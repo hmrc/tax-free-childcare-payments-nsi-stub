@@ -16,26 +16,27 @@
 
 package uk.gov.hmrc.taxfreechildcarepaymentsnsistub.controllers
 
-import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
+import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 final case class LinkResponse(correlationId: String, child_full_name: String)
 
 object LinkResponse {
   implicit lazy val format: OFormat[LinkResponse] = Json.format
 }
+
 final case class EnrichedLinkRequest(
-                                      correlationId: String,
-                                      epp_unique_customer_id: String,
-                                      epp_reg_reference: String,
-                                      outbound_child_payment_ref: String,
-                                      child_date_of_birth: String,
-                                      nino: String
-                                    )
+    correlationId: String,
+    epp_unique_customer_id: String,
+    epp_reg_reference: String,
+    outbound_child_payment_ref: String,
+    child_date_of_birth: String,
+    nino: String
+  )
 
 object EnrichedLinkRequest {
   implicit lazy val format: OFormat[EnrichedLinkRequest] = Json.format
@@ -45,21 +46,16 @@ object EnrichedLinkRequest {
 class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
-  def link(): Action[AnyContent] = Action.async { implicit request =>
-    val va = request.body.asJson
-    println(va.get("nino"))
-    va match {
-      case Some(x)  => println(x)
-      case None     => println("dont know what to do")
+  def link(): Action[JsValue] = Action(parse.json) { request =>
+    (request.body \ "correlationId").asOpt[String].map { value =>
+      Ok(Json.toJson(
+        Map("correlationId" -> value, "child_full_name" -> ("Peter Pan"))
+      ))
+    }.getOrElse {
+      BadRequest(Json.toJson(
+        Map("message" -> "Error - Missing parameter [nino]")
+      ))
     }
-    val incomingRequest = parse.json[EnrichedLinkRequest]
-    println(incomingRequest.toString())
-    incomingRequest.map(f => {
-      println(f.nino)
-      println(f.correlationId)
-//      Future.successful(Ok(Json.toJson(LinkResponse(f.correlationId, "Peter Pan"))))
-    })
-    Future.successful(Ok(Json.toJson(LinkResponse(va.get("correlationId").toString(), "Peter Pan"))))
   }
 
   def balance(): Action[AnyContent] = Action.async {
