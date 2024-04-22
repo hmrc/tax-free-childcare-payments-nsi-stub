@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.taxfreechildcarepaymentsnsistub.controllers
+package controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +49,7 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
   def link(): Action[JsValue] = Action(parse.json) { request =>
     (request.body \ "correlationId").asOpt[String].map { value =>
       Ok(Json.toJson(
-        Map("correlationId" -> value, "child_full_name" -> ("Peter Pan"))
+        Map("correlationId" -> value, "child_full_name" -> "Peter Pan")
       ))
     }.getOrElse {
       BadRequest(Json.toJson(
