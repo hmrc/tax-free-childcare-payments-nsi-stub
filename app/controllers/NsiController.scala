@@ -16,12 +16,12 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class LinkResponse(correlationId: String, child_full_name: String)
 
@@ -46,16 +46,11 @@ object EnrichedLinkRequest {
 class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
-  def link(): Action[JsValue] = Action(parse.json) { request =>
-    (request.body \ "correlationId").asOpt[String].map { value =>
-      Ok(Json.toJson(
-        Map("correlationId" -> value, "child_full_name" -> "Peter Pan")
-      ))
-    }.getOrElse {
-      BadRequest(Json.toJson(
-        Map("message" -> "Error - Missing parameter [nino]")
-      ))
-    }
+  def link(): Action[EnrichedLinkRequest] = Action(parse.json[EnrichedLinkRequest]) { request =>
+    Ok(Json.obj(
+      "correlationId"   -> request.body.correlationId,
+      "child_full_name" -> testData(request.body.nino.last)
+    ))
   }
 
   def balance(): Action[AnyContent] = Action.async {
@@ -65,4 +60,11 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
   def payment(): Action[AnyContent] = Action.async {
     Future.successful(Ok("payment is wip"))
   }
+
+  private val testData = Map(
+    'A' -> "Alice Anderson",
+    'B' -> "Bob Birch",
+    'C' -> "Carol Calloway",
+    'D' -> "Dennis Dunning"
+  )
 }
