@@ -39,8 +39,8 @@ class NsiControllerISpec
     /** Covers [[NsiController.link()]]. */
     "POST /link" should {
       s"respond $OK" when {
-        "nino is nonempty string ending in [A-D]" in {
-          val payload = Json.obj(
+        "expected JSON fields are present and NINO ends in [A-D]" in {
+          val goodPayload = Json.obj(
             "correlationId"              -> "",
             "epp_unique_customer_id"     -> "",
             "epp_reg_reference"          -> "",
@@ -51,7 +51,7 @@ class NsiControllerISpec
 
           val response = wsClient
             .url(s"$baseUrl/link")
-            .post(payload)
+            .post(goodPayload)
             .futureValue
 
           response.status shouldBe OK

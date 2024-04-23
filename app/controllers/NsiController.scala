@@ -62,9 +62,9 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
   }
 
   private val testData = Map(
-    'A' -> "Alice Anderson",
-    'B' -> "Bob Birch",
-    'C' -> "Carol Calloway",
-    'D' -> "Dennis Dunning"
+    'A' -> "Peter Pan",
+    'B' -> "Benjamin Button",
+    'C' -> "Christopher Columbus",
+    'D' -> "Donald Duck"
   )
 }
