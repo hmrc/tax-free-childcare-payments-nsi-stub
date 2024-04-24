@@ -16,7 +16,7 @@
 
 package controllers
 
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -28,32 +28,34 @@ class NsiControllerISpec
     extends AnyWordSpec
     with should.Matchers
     with ScalaFutures
+    with IntegrationPatience
     with GuiceOneServerPerSuite
     with WsTestClient
     with Status {
   withClient { wsClient =>
-
     val contextRoot = "/individuals/tax-free-childcare/payments"
     val baseUrl     = s"http://localhost:$port$contextRoot"
 
     /** Covers [[NsiController.link()]]. */
     "POST /link" should {
-      s"respond $OK" in {
-        val payload = Json.obj(
-          "correlationId"              -> "",
-          "epp_unique_customer_id"     -> "",
-          "epp_reg_reference"          -> "",
-          "outbound_child_payment_ref" -> "",
-          "child_date_of_birth"        -> "",
-          "nino"                       -> "QW123456A"
-        )
+      s"respond $OK" when {
+        "nino is nonempty string ending in [A-D]" in {
+          val payload = Json.obj(
+            "correlationId"              -> "",
+            "epp_unique_customer_id"     -> "",
+            "epp_reg_reference"          -> "",
+            "outbound_child_payment_ref" -> "",
+            "child_date_of_birth"        -> "",
+            "nino"                       -> "QW123456A"
+          )
 
-        val response = wsClient
-          .url(s"$baseUrl/link")
-          .post(payload)
-          .futureValue
+          val response = wsClient
+            .url(s"$baseUrl/link")
+            .post(payload)
+            .futureValue
 
-        response.status shouldBe OK
+          response.status shouldBe OK
+        }
       }
     }
   }
