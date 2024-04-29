@@ -1,7 +1,10 @@
-
 # tax-free-childcare-payments-nsi-stub
 
-This is a placeholder README.md for a new repository
+Stub repository for mocking responses from National Savings and Investments, a service used by [tax-free-childcare-payments](https://github.com/hmrc/tax-free-childcare-payments) to:
+
+- link an External Payment Provider (EPP) account to a Tax Free Childcare (TFC) account.
+- allow an EPP to check the balance on a TFC account.
+- allow an EPP to make TFC payments.
 
 ### License
 
