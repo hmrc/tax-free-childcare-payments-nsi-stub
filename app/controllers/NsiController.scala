@@ -16,18 +16,13 @@
 
 package controllers
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
-final case class LinkResponse(correlationId: String, child_full_name: String)
-
-object LinkResponse {
-  implicit lazy val format: OFormat[LinkResponse] = Json.format
-}
+import scala.util.Random
 
 final case class EnrichedLinkRequest(
     correlationId: String,
@@ -53,13 +48,27 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
     ))
   }
 
-  def balance(): Action[AnyContent] = Action.async {
-    Future.successful(Ok("balance  is wip"))
+  def balance(): Action[JsValue] = Action(parse.json) { request =>
+    Ok(
+      Json.obj(
+        "correlationId"      -> (request.body \ "correlationId").as[String],
+        "tfc_account_status" -> "active",
+        "paid_in_by_you"     -> randomSumOfMoney,
+        "government_top_up"  -> randomSumOfMoney,
+        "total_balance"      -> randomSumOfMoney,
+        "cleared_funds"      -> randomSumOfMoney,
+        "top_up_allowance"   -> randomSumOfMoney
+      )
+    )
   }
 
   def payment(): Action[AnyContent] = Action.async {
     Future.successful(Ok("payment is wip"))
   }
+
+  private def randomSumOfMoney: BigDecimal = BigDecimal(Random.nextInt(MAX_SUM_OF_MONEY_PENCE)).setScale(2) / 100
+
+  private val MAX_SUM_OF_MONEY_PENCE = 100000
 
   private val testData = Map(
     'A' -> "Peter Pan",
