@@ -43,7 +43,6 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
 
   def link(): Action[EnrichedLinkRequest] = Action(parse.json[EnrichedLinkRequest]) { request =>
     Ok(Json.obj(
-      "correlationId"   -> request.body.correlationId,
       "child_full_name" -> testData(request.body.nino.last)
     ))
   }
@@ -51,7 +50,6 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
   def balance(): Action[JsValue] = Action(parse.json) { request =>
     Ok(
       Json.obj(
-        "correlationId"      -> (request.body \ "correlationId").as[String],
         "tfc_account_status" -> "active",
         "paid_in_by_you"     -> randomSumOfMoney,
         "government_top_up"  -> randomSumOfMoney,
