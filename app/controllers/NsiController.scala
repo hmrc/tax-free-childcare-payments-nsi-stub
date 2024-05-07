@@ -16,16 +16,16 @@
 
 package controllers
 
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Random
 
 final case class EnrichedLinkRequest(
-    correlationId: String,
+    correlation_id: String,
     epp_unique_customer_id: String,
     epp_reg_reference: String,
     outbound_child_payment_ref: String,
@@ -34,12 +34,11 @@ final case class EnrichedLinkRequest(
   )
 
 object EnrichedLinkRequest {
-  implicit lazy val format: OFormat[EnrichedLinkRequest] = Json.format
+  implicit val reads: Reads[EnrichedLinkRequest] = Json.reads
 }
 
 @Singleton()
-class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionContext)
-    extends BackendController(cc) {
+class NsiController @Inject() (cc: ControllerComponents) extends BackendController(cc) {
 
   def link(): Action[EnrichedLinkRequest] = Action(parse.json[EnrichedLinkRequest]) { request =>
     Ok(Json.obj(
@@ -47,7 +46,7 @@ class NsiController @Inject() (cc: ControllerComponents)(implicit ec: ExecutionC
     ))
   }
 
-  def balance(): Action[JsValue] = Action(parse.json) { request =>
+  def balance(): Action[JsValue] = Action(parse.json) { _ =>
     Ok(
       Json.obj(
         "tfc_account_status" -> "active",
