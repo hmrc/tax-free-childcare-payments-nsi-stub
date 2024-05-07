@@ -41,7 +41,7 @@ class NsiControllerISpec
       s"respond $OK" when {
         "expected JSON fields are present and NINO ends in [A-D]" in {
           val goodPayload = Json.obj(
-            "correlationId"              -> "",
+            "correlation_id"              -> "",
             "epp_unique_customer_id"     -> "",
             "epp_reg_reference"          -> "",
             "outbound_child_payment_ref" -> "",
@@ -51,6 +51,27 @@ class NsiControllerISpec
 
           val response = wsClient
             .url(s"$baseUrl/link")
+            .post(goodPayload)
+            .futureValue
+
+          response.status shouldBe OK
+        }
+      }
+    }
+
+    /** Covers [[NsiController.balance()]]. */
+    "POST /balance" should {
+      s"respond $OK" when {
+        "request body is valid JSON" in {
+          val goodPayload = Json.obj(
+            "correlation_id"              -> "",
+            "epp_unique_customer_id"     -> "",
+            "epp_reg_reference"          -> "",
+            "outbound_child_payment_ref" -> ""
+          )
+
+          val response = wsClient
+            .url(s"$baseUrl/balance")
             .post(goodPayload)
             .futureValue
 
