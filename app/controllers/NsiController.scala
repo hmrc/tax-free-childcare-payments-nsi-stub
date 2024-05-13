@@ -16,16 +16,15 @@
 
 package controllers
 
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{Json, Reads}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 import scala.util.Random
 
 final case class EnrichedLinkRequest(
-    correlation_id: String,
     epp_unique_customer_id: String,
     epp_reg_reference: String,
     outbound_child_payment_ref: String,
@@ -37,35 +36,45 @@ object EnrichedLinkRequest {
   implicit val reads: Reads[EnrichedLinkRequest] = Json.reads
 }
 
-@Singleton()
-class NsiController @Inject() (cc: ControllerComponents) extends BackendController(cc) {
+@Singleton
+class NsiController @Inject() (
+    cc: ControllerComponents,
+    correlate: CorrelationIdAction
+  ) extends BackendController(cc) {
 
-  def link(): Action[EnrichedLinkRequest] = Action(parse.json[EnrichedLinkRequest]) { request =>
+  def link(): Action[EnrichedLinkRequest] = correlate(parse.json[EnrichedLinkRequest]) { request =>
     Ok(Json.obj(
       "child_full_name" -> testData(request.body.nino.last)
     ))
   }
 
-  def balance(): Action[JsValue] = Action(parse.json) { _ =>
-    Ok(
-      Json.obj(
-        "tfc_account_status" -> "active",
-        "paid_in_by_you"     -> randomSumOfMoney,
-        "government_top_up"  -> randomSumOfMoney,
-        "total_balance"      -> randomSumOfMoney,
-        "cleared_funds"      -> randomSumOfMoney,
-        "top_up_allowance"   -> randomSumOfMoney
-      )
-    )
+  def balance(): Action[AnyContent] = correlate {
+    Ok(Json.obj(
+      "tfc_account_status" -> "active",
+      "paid_in_by_you"     -> randomSumOfMoney,
+      "government_top_up"  -> randomSumOfMoney,
+      "total_balance"      -> randomSumOfMoney,
+      "cleared_funds"      -> randomSumOfMoney,
+      "top_up_allowance"   -> randomSumOfMoney
+    ))
   }
 
-  def payment(): Action[AnyContent] = Action.async {
-    Future.successful(Ok("payment is wip"))
+  def payment(): Action[AnyContent] = correlate {
+    Ok(Json.obj(
+      "payment_reference"      -> randomPaymentRef,
+      "estimated_payment_date" -> randomDate
+    ))
   }
 
-  private def randomSumOfMoney: BigDecimal = BigDecimal(Random.nextInt(MAX_SUM_OF_MONEY_PENCE)).setScale(2) / 100
+  private def randomSumOfMoney = BigDecimal(Random.nextInt(MAX_SUM_OF_MONEY_PENCE)).setScale(2) / 100
+  private def randomDate       = LocalDate.now() plusDays randomPaymentDelayDays
+  private def randomPaymentRef = Array.fill(PAYMENT_REF_LENGTH)(randomDigit).mkString
+
+  @inline private def randomPaymentDelayDays = Random.nextInt(30)
+  @inline private def randomDigit            = Random.nextInt(10)
 
   private val MAX_SUM_OF_MONEY_PENCE = 100000
+  private val PAYMENT_REF_LENGTH     = 16
 
   private val testData = Map(
     'A' -> "Peter Pan",
