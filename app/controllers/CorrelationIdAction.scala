@@ -28,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 @Singleton
-class CorrelatedAction @Inject() (
+class CorrelationIdAction @Inject()(
     val parser: BodyParsers.Default
   )(implicit val executionContext: ExecutionContext
   ) extends ActionBuilder[Request, AnyContent] with Results with Status {

@@ -39,7 +39,7 @@ object EnrichedLinkRequest {
 @Singleton
 class NsiController @Inject() (
     cc: ControllerComponents,
-    correlate: CorrelatedAction
+    correlate: CorrelationIdAction
   ) extends BackendController(cc) {
 
   def link(): Action[EnrichedLinkRequest] = correlate(parse.json[EnrichedLinkRequest]) { request =>
