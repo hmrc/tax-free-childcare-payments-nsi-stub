@@ -1,3 +1,4 @@
+import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import uk.gov.hmrc.DefaultBuildSettings
 
 ThisBuild / majorVersion := 0
@@ -20,7 +21,8 @@ lazy val microservice = Project("tax-free-childcare-payments-nsi-stub", file("."
       "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     ),
     resolvers += Resolver.jcenterRepo,
-    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources"
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    playDefaultPort := 10501
   )
   .settings(CodeCoverageSettings.settings *)
 
