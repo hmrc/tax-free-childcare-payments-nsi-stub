@@ -27,7 +27,7 @@ final case class ErrorResponse(
 object ErrorResponse {
 
   object Code extends Enumeration {
-    protected case class CodeVal(statusCode: Int) extends super.Val
+    case class CodeVal(statusCode: Int) extends super.Val
 
     val E0000: CodeVal = CodeVal(400)
     val E0001: CodeVal = CodeVal(400)
@@ -44,10 +44,12 @@ object ErrorResponse {
     val E0021: CodeVal = CodeVal(400)
     val E0022: CodeVal = CodeVal(400)
     val E0024: CodeVal = CodeVal(400)
-    val E9000: CodeVal = CodeVal(400)
-    val E9999: CodeVal = CodeVal(400)
-    val E8000: CodeVal = CodeVal(400)
-    val E8001: CodeVal = CodeVal(400)
+
+    val E9000: CodeVal = CodeVal(500)
+    val E9999: CodeVal = CodeVal(500)
+
+    val E8000: CodeVal = CodeVal(503)
+    val E8001: CodeVal = CodeVal(503)
 
     implicit val writes: Writes[Code.Value] = Json.formatEnum(Code)
   }
