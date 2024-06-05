@@ -16,13 +16,13 @@
 
 package controllers
 
-import play.api.libs.json.{Json, Reads}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.util.Random
+
+import play.api.libs.json.{Json, Reads}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 final case class EnrichedLinkRequest(
     epp_unique_customer_id: String,
