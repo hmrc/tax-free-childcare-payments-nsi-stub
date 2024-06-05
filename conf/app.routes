@@ -1,5 +1,5 @@
 # microservice specific routes
 
-POST       /link           controllers.NsiController.link
-POST       /balance        controllers.NsiController.balance
-POST       /               controllers.NsiController.payment
+POST       /linknsi           controllers.NsiController.link
+POST       /balancensi        controllers.NsiController.balance
+POST       /pnsi               controllers.NsiController.payment
