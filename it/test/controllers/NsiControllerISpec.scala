@@ -35,7 +35,7 @@ class NsiControllerISpec
     with WsTestClient
     with Status {
   withClient { wsClient =>
-    val contextRoot = "/individuals/tax-free-childcare/payments"
+    val contextRoot = "/tax-free-childcare-payments-nsi-stub"
     val baseUrl     = s"http://localhost:$port$contextRoot"
 
     /** Covers [[NsiController.link()]]. */
