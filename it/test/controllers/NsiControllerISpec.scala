@@ -40,7 +40,7 @@ class NsiControllerISpec
     with TableDrivenPropertyChecks
     with JsonGenerators {
   withClient { wsClient =>
-    val contextRoot = "/individuals/tax-free-childcare/payments"
+    val contextRoot = "/tax-free-childcare-payments-nsi-stub"
     val baseUrl     = s"http://localhost:$port$contextRoot"
 
     val errorScenarios = Table(

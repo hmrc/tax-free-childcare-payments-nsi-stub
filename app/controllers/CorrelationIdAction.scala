@@ -16,19 +16,20 @@
 
 package controllers
 
-import com.google.inject.Inject
-import play.api.http.Status
-import play.api.libs.json.Json
-import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
-
 import java.util.UUID
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+import com.google.inject.Inject
+
+import play.api.http.Status
+import play.api.libs.json.Json
+import play.api.mvc._
+import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+
 @Singleton
-class CorrelationIdAction @Inject()(
+class CorrelationIdAction @Inject() (
     val parser: BodyParsers.Default
   )(implicit val executionContext: ExecutionContext
   ) extends ActionBuilder[Request, AnyContent] with Results with Status {

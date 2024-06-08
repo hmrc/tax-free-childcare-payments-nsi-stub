@@ -17,6 +17,7 @@
 package models
 
 import models.ErrorResponse.Code
+
 import play.api.libs.json.{Json, Writes}
 
 final case class ErrorResponse(
