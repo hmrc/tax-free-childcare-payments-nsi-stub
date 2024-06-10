@@ -16,16 +16,17 @@
 
 package controllers
 
-import models.ErrorResponse.Code._
-import models.{ErrorResponse, SharedRequestData}
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.util.Random
+
+import models.ErrorResponse.Code._
+import models.{ErrorResponse, SharedRequestData}
+
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc._
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
 class NsiController @Inject() (
