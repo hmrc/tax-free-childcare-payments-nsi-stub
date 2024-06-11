@@ -16,63 +16,76 @@
 
 package controllers
 
-import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
-import scala.util.Random
-
 import models.ErrorResponse.Code._
-import models.{ErrorResponse, SharedRequestData}
-
+import models.{AuthenticationData, ErrorResponse}
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
+import scala.util.Random
 
 @Singleton
 class NsiController @Inject() (
     cc: ControllerComponents,
     correlate: CorrelationIdAction
-  ) extends BackendController(cc) {
+  ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(): Action[JsValue] = withNsiErrorScenarios { sharedRequestData =>
-    Ok(Json.obj(
-      "child_full_name" -> testChildren(sharedRequestData.nino.last)
-    ))
+  def link(accountRef: String, authData: AuthenticationData): Action[JsValue] =
+    withLogging(accountRef, authData) {
+      withNsiErrorScenarios(authData) { auth_data =>
+        Ok(Json.obj(
+          "child_full_name" -> testChildren(auth_data.parent_nino.last)
+        ))
+      }
+    }
+
+  def balance(accountRef: String, authData: AuthenticationData): Action[JsValue] =
+    withLogging(accountRef, authData) {
+      withNsiErrorScenarios(authData) { _ =>
+        Ok(Json.obj(
+          "tfc_account_status" -> "active",
+          "paid_in_by_you"     -> randomSumOfMoney,
+          "government_top_up"  -> randomSumOfMoney,
+          "total_balance"      -> randomSumOfMoney,
+          "cleared_funds"      -> randomSumOfMoney,
+          "top_up_allowance"   -> randomSumOfMoney
+        ))
+      }
+    }
+
+  def payment(accountRef: String, authData: AuthenticationData): Action[JsValue] =
+    withLogging(accountRef, authData) {
+      withNsiErrorScenarios(authData) { _ =>
+        Ok(Json.obj(
+          "payment_reference"      -> randomPaymentRef,
+          "estimated_payment_date" -> randomDate
+        ))
+      }
+    }
+
+  private def withLogging[A](accountRef: String, authData: AuthenticationData)(action: => Action[A]) = {
+    logger.info(s"Received account ref: $accountRef")
+    logger.info(s"Received EPP ID: ${authData.epp_account}")
+    logger.info(s"Received EPP URN: ${authData.epp_urn}")
+    logger.info(s"Received parent nino: ${authData.parent_nino}")
+
+    action
   }
 
-  def balance(): Action[JsValue] = withNsiErrorScenarios { _ =>
-    Ok(Json.obj(
-      "tfc_account_status" -> "active",
-      "paid_in_by_you"     -> randomSumOfMoney,
-      "government_top_up"  -> randomSumOfMoney,
-      "total_balance"      -> randomSumOfMoney,
-      "cleared_funds"      -> randomSumOfMoney,
-      "top_up_allowance"   -> randomSumOfMoney
-    ))
-  }
-
-  def payment(): Action[JsValue] = withNsiErrorScenarios { _ =>
-    Ok(Json.obj(
-      "payment_reference"      -> randomPaymentRef,
-      "estimated_payment_date" -> randomDate
-    ))
-  }
-
-  private def withNsiErrorScenarios(block: SharedRequestData => Result) =
-    correlate.async(parse.json) { implicit request =>
-      withJsonBody[SharedRequestData] { sharedRequestData =>
-        Future.successful(
-          testErrorScenarios get sharedRequestData.nino match {
-            case Some(nsiErrorCode) =>
-              new Status(nsiErrorCode.statusCode)(
-                Json.toJson(
-                  ErrorResponse(nsiErrorCode, "asdf")
-                )
-              )
-            case None               => block(sharedRequestData)
-          }
-        )
+  private def withNsiErrorScenarios(authData: AuthenticationData)(block: AuthenticationData => Result) =
+    correlate(parse.json) { _ =>
+      testErrorScenarios get authData.parent_nino match {
+        case Some(nsiErrorCode) =>
+          new Status(nsiErrorCode.statusCode)(
+            Json.toJson(
+              ErrorResponse(nsiErrorCode, "asdf")
+            )
+          )
+        case None               => block(authData)
       }
     }
 }
