@@ -16,16 +16,17 @@
 
 package controllers
 
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
+import scala.util.Random
+
 import models.ErrorResponse.Code._
 import models.{AuthenticationData, ErrorResponse}
+
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
-import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
-import scala.util.Random
 
 @Singleton
 class NsiController @Inject() (
