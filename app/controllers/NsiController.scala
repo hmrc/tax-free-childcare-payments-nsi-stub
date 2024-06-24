@@ -22,8 +22,8 @@ import scala.concurrent.Future
 import scala.util.Random
 
 import models.ErrorResponse.Code._
-import models.{ErrorResponse, SharedRequestData}
-
+import models.{AuthenticationData, ErrorResponse}
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -32,16 +32,20 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 class NsiController @Inject() (
     cc: ControllerComponents,
     correlate: CorrelationIdAction
-  ) extends BackendController(cc) {
+  ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(): Action[JsValue] = withNsiErrorScenarios { sharedRequestData =>
-    Ok(Json.obj(
-      "child_full_name" -> testChildren(sharedRequestData.nino.last)
-    ))
+  def link(accountRef: String): Action[JsValue] = correlate(parse.json).async { implicit req =>
+    withJsonBody { authData: AuthenticationData =>
+      withNsiErrorScenarios(authData) { authData =>
+        Ok(Json.obj(
+          "child_full_name" -> testChildren(authData.parent_nino.last)
+        ))
+      }
+    }
   }
 
-  def balance(): Action[JsValue] = withNsiErrorScenarios { _ =>
+  def balance(accountRef: String, authData: AuthenticationData): Action[AnyContent] = correlate {
     Ok(Json.obj(
       "tfc_account_status" -> "active",
       "paid_in_by_you"     -> randomSumOfMoney,
@@ -52,27 +56,23 @@ class NsiController @Inject() (
     ))
   }
 
-  def payment(): Action[JsValue] = withNsiErrorScenarios { _ =>
+  def payment(): Action[JsValue] = correlate(parse.json) { _ =>
     Ok(Json.obj(
       "payment_reference"      -> randomPaymentRef,
       "estimated_payment_date" -> randomDate
     ))
   }
 
-  private def withNsiErrorScenarios(block: SharedRequestData => Result) =
-    correlate.async(parse.json) { implicit request =>
-      withJsonBody[SharedRequestData] { sharedRequestData =>
-        Future.successful(
-          testErrorScenarios get sharedRequestData.nino match {
-            case Some(nsiErrorCode) =>
-              new Status(nsiErrorCode.statusCode)(
-                Json.toJson(
-                  ErrorResponse(nsiErrorCode, "asdf")
-                )
-              )
-            case None               => block(sharedRequestData)
-          }
-        )
+  private def withNsiErrorScenarios(authData: AuthenticationData)(block: AuthenticationData => Result) =
+    Future.successful {
+      testErrorScenarios get authData.parent_nino match {
+        case Some(nsiErrorCode) =>
+          new Status(nsiErrorCode.statusCode)(
+            Json.toJson(
+              ErrorResponse(nsiErrorCode, "asdf")
+            )
+          )
+        case None               => block(authData)
       }
     }
 }
