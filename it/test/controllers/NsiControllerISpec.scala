@@ -75,7 +75,7 @@ class NsiControllerISpec
           .futureValue
       )
 
-    val link_url = "/link"
+    val link_url = "/account/v1/accounts/link-to-EPP/"
     s"POST $link_url" should {
       s"respond $OK and echo the correlation ID in the response header" when {
         "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in {

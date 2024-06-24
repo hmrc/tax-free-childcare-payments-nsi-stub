@@ -1,5 +1,5 @@
 # microservice specific routes
 
-POST      /account/:ref/link           controllers.NsiController.link(   ref: String, auth_data: AuthenticationData)
-GET       /account/:ref/balance        controllers.NsiController.balance(ref: String, auth_data: AuthenticationData)
-POST      /account/:ref/payment        controllers.NsiController.payment(ref: String, auth_data: AuthenticationData)
+POST      /account/v1/accounts/link-to-EPP/:ref           controllers.NsiController.link(ref: String)
+GET       /account/v1/accounts/balance/:ref               controllers.NsiController.balance(ref: String, authData: AuthenticationData)
+POST      /payment/v1/payments/pay-childcare              controllers.NsiController.payment()

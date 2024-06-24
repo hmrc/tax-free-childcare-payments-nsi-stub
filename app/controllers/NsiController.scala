@@ -16,17 +16,17 @@
 
 package controllers
 
-import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
-import scala.util.Random
-
 import models.ErrorResponse.Code._
 import models.{AuthenticationData, ErrorResponse}
-
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+import scala.util.Random
 
 @Singleton
 class NsiController @Inject() (
@@ -35,50 +35,36 @@ class NsiController @Inject() (
   ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(accountRef: String, authData: AuthenticationData): Action[JsValue] =
-    withLogging(accountRef, authData) {
-      withNsiErrorScenarios(authData) { auth_data =>
+  def link(accountRef: String): Action[JsValue] = correlate(parse.json).async { implicit req =>
+    withJsonBody { authData: AuthenticationData =>
+      withNsiErrorScenarios(authData) { authData =>
         Ok(Json.obj(
-          "child_full_name" -> testChildren(auth_data.parent_nino.last)
+          "child_full_name" -> testChildren(authData.parent_nino.last)
         ))
       }
     }
+  }
 
-  def balance(accountRef: String, authData: AuthenticationData): Action[JsValue] =
-    withLogging(accountRef, authData) {
-      withNsiErrorScenarios(authData) { _ =>
-        Ok(Json.obj(
-          "tfc_account_status" -> "active",
-          "paid_in_by_you"     -> randomSumOfMoney,
-          "government_top_up"  -> randomSumOfMoney,
-          "total_balance"      -> randomSumOfMoney,
-          "cleared_funds"      -> randomSumOfMoney,
-          "top_up_allowance"   -> randomSumOfMoney
-        ))
-      }
-    }
+  def balance(accountRef: String, authData: AuthenticationData): Action[AnyContent] = correlate {
+    Ok(Json.obj(
+      "tfc_account_status" -> "active",
+      "paid_in_by_you"     -> randomSumOfMoney,
+      "government_top_up"  -> randomSumOfMoney,
+      "total_balance"      -> randomSumOfMoney,
+      "cleared_funds"      -> randomSumOfMoney,
+      "top_up_allowance"   -> randomSumOfMoney
+    ))
+  }
 
-  def payment(accountRef: String, authData: AuthenticationData): Action[JsValue] =
-    withLogging(accountRef, authData) {
-      withNsiErrorScenarios(authData) { _ =>
-        Ok(Json.obj(
-          "payment_reference"      -> randomPaymentRef,
-          "estimated_payment_date" -> randomDate
-        ))
-      }
-    }
-
-  private def withLogging[A](accountRef: String, authData: AuthenticationData)(action: => Action[A]) = {
-    logger.info(s"Received account ref: $accountRef")
-    logger.info(s"Received EPP ID: ${authData.epp_account}")
-    logger.info(s"Received EPP URN: ${authData.epp_urn}")
-    logger.info(s"Received parent nino: ${authData.parent_nino}")
-
-    action
+  def payment(): Action[JsValue] = correlate(parse.json) { _ =>
+    Ok(Json.obj(
+      "payment_reference"      -> randomPaymentRef,
+      "estimated_payment_date" -> randomDate
+    ))
   }
 
   private def withNsiErrorScenarios(authData: AuthenticationData)(block: AuthenticationData => Result) =
-    correlate(parse.json) { _ =>
+    Future.successful {
       testErrorScenarios get authData.parent_nino match {
         case Some(nsiErrorCode) =>
           new Status(nsiErrorCode.statusCode)(
