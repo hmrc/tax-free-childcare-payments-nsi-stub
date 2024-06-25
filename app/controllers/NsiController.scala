@@ -17,6 +17,8 @@
 package controllers
 
 import models.ErrorResponse.Code._
+import models.request.LinkAccountsRequest
+import models.response.LinkAccountsResponse
 import models.{AuthenticationData, ErrorResponse}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
@@ -36,12 +38,16 @@ class NsiController @Inject() (
   import NsiController._
 
   def link(accountRef: String): Action[JsValue] = correlate(parse.json).async { implicit req =>
-    withJsonBody { authData: AuthenticationData =>
-      withNsiErrorScenarios(authData) { authData =>
-        Ok(Json.obj(
-          "child_full_name" -> testChildren(authData.parent_nino.last)
-        ))
-      }
+    withJsonBody { body: LinkAccountsRequest =>
+      Future.successful(
+        Created(
+          Json.toJson(
+            LinkAccountsResponse(
+              testChildren(body.parent_nino.last)
+            )
+          )
+        )
+      )
     }
   }
 

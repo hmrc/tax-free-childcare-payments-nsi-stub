@@ -23,6 +23,7 @@ import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status
 import play.api.libs.ws.WSResponse
 import play.api.test.WsTestClient
@@ -38,7 +39,8 @@ class NsiControllerISpec
     with WsTestClient
     with Status
     with TableDrivenPropertyChecks
-    with JsonGenerators {
+    with JsonGenerators
+    with ScalaCheckPropertyChecks {
   withClient { wsClient =>
     val contextRoot = "/tax-free-childcare-payments-nsi-stub"
     val baseUrl     = s"http://localhost:$port$contextRoot"
@@ -75,16 +77,20 @@ class NsiControllerISpec
           .futureValue
       )
 
-    val link_url = "/account/v1/accounts/link-to-EPP/"
-    s"POST $link_url" should {
+    val link_url = "/account/v1/accounts/link-to-EPP"
+    s"POST $link_url/:ref" should {
       s"respond $OK and echo the correlation ID in the response header" when {
-        "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in {
-          val expectedCorrelationId = UUID.randomUUID()
+        "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in
+          forAll { scenario: LinkAccountsHappyScenario =>
+            val response = wsClient
+              .url(s"$baseUrl$link_url/${scenario.account_ref}")
+              .withHttpHeaders("correlationId" -> scenario.correlation_id.toString)
+              .post(scenario.requestBody)
+              .futureValue
 
-          forAllScenariosWithValidRequest(link_url, expectedCorrelationId) { response =>
-            response.status shouldBe OK
+            response.status shouldBe CREATED
+            assert((response.json \ "childFullName").isDefined)
           }
-        }
       }
 
       forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
