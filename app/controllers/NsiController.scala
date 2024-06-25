@@ -51,8 +51,8 @@ class NsiController @Inject() (
     }
   }
 
-  def balance(accountRef: String, authData: CheckBalanceRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(authData.parent_nino) {
+  def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
+    withNsiErrorScenarios(requestData.parent_nino) {
       Ok(
         Json.obj(
           "tfc_account_status" -> "active",

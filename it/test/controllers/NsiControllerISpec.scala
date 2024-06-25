@@ -70,15 +70,6 @@ class NsiControllerISpec
       ("E8001", 503, "AA118001A")
     )
 
-    def forAllScenariosWithValidRequest(resource: String, expectedCorrelationId: UUID)(check: WSResponse => Assertion) =
-      check(
-        wsClient
-          .url(s"$baseUrl$resource")
-          .withHttpHeaders("Correlation-ID" -> expectedCorrelationId.toString)
-          .post(randomSharedRequestDataJsonWithNino("BB001111B"))
-          .futureValue
-      )
-
     val link_url = "/account/v1/accounts/link-to-EPP"
     s"POST $link_url/:ref" should {
       s"respond $OK and echo the correlation ID in the response header" when {
@@ -121,7 +112,7 @@ class NsiControllerISpec
         "request contains valid correlation ID header" in
           forAll(CheckBalanceScenario.genWithRandomNino) { scenario =>
             val response = wsClient
-              .url(s"$baseUrl$balance_url/${scenario.account_ref}${scenario.queryString}")
+              .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
               .get()
               .futureValue
@@ -132,32 +123,37 @@ class NsiControllerISpec
 
       forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
         s"respond with status code $expectedStatusCode" when {
-          s"given nino $nino" in {
-            val response =
-              wsClient
-                .url(s"$baseUrl$balance_url")
-                .withHttpHeaders("Correlation-ID" -> UUID.randomUUID().toString)
-                .post(randomSharedRequestDataJsonWithNino(nino))
-                .futureValue
+          s"given nino $nino" in
+            forAll(CheckBalanceScenario genWithFixedNino nino) { scenario =>
+              val response =
+                wsClient
+                  .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
+                  .withHttpHeaders("Correlation-ID" -> scenario.correlation_id.toString)
+                  .get()
+                  .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
+              val actualErrorCode = (response.json \ "errorCode").as[String]
 
-            response.status shouldBe expectedStatusCode
-            actualErrorCode shouldBe expectedErrorCode
-          }
+              response.status shouldBe expectedStatusCode
+              actualErrorCode shouldBe expectedErrorCode
+            }
         }
       }
     }
 
-    val payment_url = "/"
+    val payment_url = "/payment/v1/payments/pay-childcare"
     s"POST $payment_url" should {
-      s"respond $OK and echo the correlation ID in the response header" when {
-        "request contains valid correlation ID header" in {
-          val expectedCorrelationId = UUID.randomUUID()
+      s"respond $CREATED and echo the correlation ID in the response header" when {
+        "request contains valid correlation ID header" in
+          forAll(MakePaymentScenario.genWithRandomNino) { scenario =>
+            val response =
+              wsClient
+                .url(s"$baseUrl$payment_url")
+                .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+                .post(scenario.requestBody)
+                .futureValue
 
-          forAllScenariosWithValidRequest(payment_url, expectedCorrelationId) { response =>
-            response.status shouldBe OK
-          }
+            response.status shouldBe CREATED
         }
       }
 
