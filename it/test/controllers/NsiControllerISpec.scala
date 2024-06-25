@@ -115,32 +115,35 @@ class NsiControllerISpec
       }
     }
 
-    val balance_url = "/balance"
-    s"POST $balance_url" should {
+    val balance_url = "/account/v1/accounts/balance"
+    s"GET $balance_url" should {
       s"respond $OK and echo the correlation ID in the response header" when {
-        "request contains valid correlation ID header" in {
-          val expectedCorrelationId = UUID.randomUUID()
+        "request contains valid correlation ID header" in
+          forAll(CheckBalanceScenario.genWithRandomNino) { scenario =>
+            val response = wsClient
+              .url(s"$baseUrl$balance_url/${scenario.account_ref}${scenario.queryString}")
+              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+              .get()
+              .futureValue
 
-          forAllScenariosWithValidRequest(balance_url, expectedCorrelationId) { response =>
             response.status shouldBe OK
           }
-        }
+      }
 
-        forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
-          s"respond with status code $expectedStatusCode" when {
-            s"given nino $nino" in {
-              val response =
-                wsClient
-                  .url(s"$baseUrl$balance_url")
-                  .withHttpHeaders("Correlation-ID" -> UUID.randomUUID().toString)
-                  .post(randomSharedRequestDataJsonWithNino(nino))
-                  .futureValue
+      forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+        s"respond with status code $expectedStatusCode" when {
+          s"given nino $nino" in {
+            val response =
+              wsClient
+                .url(s"$baseUrl$balance_url")
+                .withHttpHeaders("Correlation-ID" -> UUID.randomUUID().toString)
+                .post(randomSharedRequestDataJsonWithNino(nino))
+                .futureValue
 
-              val actualErrorCode = (response.json \ "errorCode").as[String]
+            val actualErrorCode = (response.json \ "errorCode").as[String]
 
-              response.status shouldBe expectedStatusCode
-              actualErrorCode shouldBe expectedErrorCode
-            }
+            response.status shouldBe expectedStatusCode
+            actualErrorCode shouldBe expectedErrorCode
           }
         }
       }
