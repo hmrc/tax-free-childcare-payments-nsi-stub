@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package models
+package models.request
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Reads}
 import play.api.mvc.QueryStringBindable
 
-final case class AuthenticationData(epp_urn: String, epp_account: String, parent_nino: String)
+final case class CheckBalanceRequest(epp_urn: String, epp_account: String, parent_nino: String)
 
 /** Param keys should match Swagger at <https://drive.google.com/drive/folders/1ES36CjJpVumXXCM8VC5VQQa7J3xIIqoW>. */
-object AuthenticationData {
+object CheckBalanceRequest {
   private val epp_urn_key     = "eppURN"
   private val epp_account_key = "eppAccount"
   private val parent_nino_key = "parentNino"
 
-  implicit val binder: QueryStringBindable[AuthenticationData] = new QueryStringBindable[AuthenticationData] {
+  implicit val binder: QueryStringBindable[CheckBalanceRequest] = new QueryStringBindable[CheckBalanceRequest] {
 
-    def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, AuthenticationData]] = for {
+    def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, CheckBalanceRequest]] = for {
       epp_urn     <- params get epp_urn_key flatMap (_.headOption)
       epp_account <- params get epp_account_key flatMap (_.headOption)
       parent_nino <- params get parent_nino_key flatMap (_.headOption)
     } yield Right(apply(epp_urn, epp_account, parent_nino))
 
-    def unbind(key: String, value: AuthenticationData): String = Map(
+    def unbind(key: String, value: CheckBalanceRequest): String = Map(
       epp_urn_key     -> value.epp_urn,
       epp_account_key -> value.epp_account,
       parent_nino_key -> value.parent_nino
@@ -45,10 +45,9 @@ object AuthenticationData {
       .mkString("&")
   }
 
-  implicit val reads: Reads[AuthenticationData] = (
+  implicit val reads: Reads[CheckBalanceRequest] = (
     (__ \ epp_urn_key).read[String] ~
       (__ \ epp_account_key).read[String] ~
       (__ \ parent_nino_key).read[String]
   )(apply _)
-
 }

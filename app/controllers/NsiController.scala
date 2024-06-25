@@ -16,12 +16,12 @@
 
 package controllers
 
+import models.ErrorResponse
 import models.ErrorResponse.Code._
-import models.request.LinkAccountsRequest
+import models.request.{CheckBalanceRequest, LinkAccountsRequest}
 import models.response.LinkAccountsResponse
-import models.{AuthenticationData, ErrorResponse}
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -51,15 +51,19 @@ class NsiController @Inject() (
     }
   }
 
-  def balance(accountRef: String, authData: AuthenticationData): Action[AnyContent] = correlate {
-    Ok(Json.obj(
-      "tfc_account_status" -> "active",
-      "paid_in_by_you"     -> randomSumOfMoney,
-      "government_top_up"  -> randomSumOfMoney,
-      "total_balance"      -> randomSumOfMoney,
-      "cleared_funds"      -> randomSumOfMoney,
-      "top_up_allowance"   -> randomSumOfMoney
-    ))
+  def balance(accountRef: String, authData: CheckBalanceRequest): Action[AnyContent] = correlate {
+    withNsiErrorScenarios(authData.parent_nino) {
+      Ok(
+        Json.obj(
+          "tfc_account_status" -> "active",
+          "paid_in_by_you"     -> randomSumOfMoney,
+          "government_top_up"  -> randomSumOfMoney,
+          "total_balance"      -> randomSumOfMoney,
+          "cleared_funds"      -> randomSumOfMoney,
+          "top_up_allowance"   -> randomSumOfMoney
+        )
+      )
+    }
   }
 
   def payment(): Action[JsValue] = correlate(parse.json) { _ =>
@@ -70,17 +74,18 @@ class NsiController @Inject() (
   }
 
   private def withNsiErrorScenarios(parentNino: String)(block: => Result) =
-    Future.successful {
-      testErrorScenarios get parentNino match {
-        case Some(nsiErrorCode) =>
-          new Status(nsiErrorCode.statusCode)(
-            Json.toJson(
-              ErrorResponse(nsiErrorCode, "asdf")
-            )
+    testErrorScenarios get parentNino match {
+      case Some(nsiErrorCode) =>
+        new Status(nsiErrorCode.statusCode)(
+          Json.toJson(
+            ErrorResponse(nsiErrorCode, "asdf")
           )
-        case None               => block
-      }
+        )
+      case None               => block
     }
+
+  private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
+    withJsonBody(f andThen Future.successful)
 }
 
 object NsiController {
