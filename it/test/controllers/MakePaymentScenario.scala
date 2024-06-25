@@ -1,0 +1,62 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers
+
+import base.Generators
+import models.request.ChildCareProvider
+import play.api.libs.json.{JsObject, Json}
+
+import java.util.UUID
+
+final case class MakePaymentScenario(
+    correlation_id: UUID,
+    account_ref: String,
+    epp_urn: String,
+    epp_account: String,
+    parent_nino: String,
+    ccp_opt: Option[ChildCareProvider],
+    payment_amount: Int
+  ) {
+
+  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
+  val requestBody: JsObject = Json.obj(
+    "childAccountPaymentRef" -> account_ref,
+    "eppURN"                 -> epp_urn,
+    "eppAccount"             -> epp_account,
+    "parentNino"             -> parent_nino,
+    "payeeType"              -> (if (ccp_opt.isDefined) "ccp" else "epp"),
+    "ccpURN"                 -> ccp_opt.map(_.urn),
+    "ccpPostcode"            -> ccp_opt.map(_.postcode),
+    "paymentAmount"          -> payment_amount
+  )
+}
+
+object MakePaymentScenario extends Generators {
+  import org.scalacheck.Gen
+
+  val genWithRandomNino: Gen[MakePaymentScenario] = ninos flatMap genWithFixedNino
+
+  def genWithFixedNino(nino: String): Gen[MakePaymentScenario] =
+    for {
+      correlation_id <- Gen.uuid
+      account_ref    <- nonEmptyAlphaNumStrings
+      epp_urn        <- nonEmptyAlphaNumStrings
+      epp_account    <- nonEmptyAlphaNumStrings
+      ccp_opt        <- Gen option childCareProviders
+      payment_amount <- Gen.posNum[Int]
+    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, ccp_opt, payment_amount)
+}
