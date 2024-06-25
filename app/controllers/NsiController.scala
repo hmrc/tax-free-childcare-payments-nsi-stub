@@ -39,7 +39,7 @@ class NsiController @Inject() (
 
   def link(accountRef: String): Action[JsValue] = correlate(parse.json).async { implicit req =>
     withJsonBody { body: LinkAccountsRequest =>
-      Future.successful(
+      withNsiErrorScenarios(body.parent_nino) {
         Created(
           Json.toJson(
             LinkAccountsResponse(
@@ -47,7 +47,7 @@ class NsiController @Inject() (
             )
           )
         )
-      )
+      }
     }
   }
 
@@ -69,16 +69,16 @@ class NsiController @Inject() (
     ))
   }
 
-  private def withNsiErrorScenarios(authData: AuthenticationData)(block: AuthenticationData => Result) =
+  private def withNsiErrorScenarios(parentNino: String)(block: => Result) =
     Future.successful {
-      testErrorScenarios get authData.parent_nino match {
+      testErrorScenarios get parentNino match {
         case Some(nsiErrorCode) =>
           new Status(nsiErrorCode.statusCode)(
             Json.toJson(
               ErrorResponse(nsiErrorCode, "asdf")
             )
           )
-        case None               => block(authData)
+        case None               => block
       }
     }
 }

@@ -45,6 +45,8 @@ class NsiControllerISpec
     val contextRoot = "/tax-free-childcare-payments-nsi-stub"
     val baseUrl     = s"http://localhost:$port$contextRoot"
 
+    val CORRELATION_ID = "correlationId"
+
     val errorScenarios = Table(
       ("Expected Error Code", "Expected Status Code", "NI Number"),
       ("E0000", 400, "AA110000A"),
@@ -81,10 +83,10 @@ class NsiControllerISpec
     s"POST $link_url/:ref" should {
       s"respond $OK and echo the correlation ID in the response header" when {
         "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in
-          forAll { scenario: LinkAccountsHappyScenario =>
+          forAll(LinkAccountsScenario.genWithRandomNino) { scenario =>
             val response = wsClient
               .url(s"$baseUrl$link_url/${scenario.account_ref}")
-              .withHttpHeaders("correlationId" -> scenario.correlation_id.toString)
+              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
               .post(scenario.requestBody)
               .futureValue
 
@@ -95,19 +97,20 @@ class NsiControllerISpec
 
       forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
         s"respond with status code $expectedStatusCode" when {
-          s"given nino $nino" in {
-            val response =
-              wsClient
-                .url(s"$baseUrl$link_url")
-                .withHttpHeaders("Correlation-ID" -> UUID.randomUUID().toString)
-                .post(randomSharedRequestDataJsonWithNino(nino))
-                .futureValue
+          s"given nino $nino" in
+            forAll(LinkAccountsScenario genWithFixedNino nino) { scenario =>
+              val response =
+                wsClient
+                  .url(s"$baseUrl$link_url/${scenario.account_ref}")
+                  .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+                  .post(scenario.requestBody)
+                  .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
+              val actualErrorCode = (response.json \ "errorCode").as[String]
 
-            response.status shouldBe expectedStatusCode
-            actualErrorCode shouldBe expectedErrorCode
-          }
+              response.status shouldBe expectedStatusCode
+              actualErrorCode shouldBe expectedErrorCode
+            }
         }
       }
     }
