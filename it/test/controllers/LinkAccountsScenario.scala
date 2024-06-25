@@ -22,7 +22,7 @@ import play.api.libs.json.{JsObject, Json}
 import java.time.LocalDate
 import java.util.UUID
 
-final case class LinkAccountsHappyScenario(
+final case class LinkAccountsScenario(
     correlation_id: UUID,
     account_ref: String,
     epp_urn: String,
@@ -40,17 +40,17 @@ final case class LinkAccountsHappyScenario(
   )
 }
 
-object LinkAccountsHappyScenario extends Generators {
-  import org.scalacheck.{Arbitrary, Gen}
+object LinkAccountsScenario extends Generators {
+  import org.scalacheck.Gen
 
-  implicit val arb: Arbitrary[LinkAccountsHappyScenario] = Arbitrary(
+  val genWithRandomNino: Gen[LinkAccountsScenario] = ninos flatMap genWithFixedNino
+
+  def genWithFixedNino(nino: String): Gen[LinkAccountsScenario] =
     for {
       correlation_id <- Gen.uuid
       account_ref    <- nonEmptyAlphaNumStrings
       epp_urn        <- nonEmptyAlphaNumStrings
       epp_account    <- nonEmptyAlphaNumStrings
-      parent_nino    <- ninos
       child_age_days <- Gen.chooseNum(0, 18 * 365)
-    } yield apply(correlation_id, account_ref, epp_urn, epp_account, parent_nino, LocalDate.now() minusDays child_age_days)
-  )
+    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, LocalDate.now() minusDays child_age_days)
 }
