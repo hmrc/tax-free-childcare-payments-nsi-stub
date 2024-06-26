@@ -23,7 +23,7 @@ import scala.util.Random
 
 import models.ErrorResponse
 import models.ErrorResponse.Code._
-import models.request.{CheckBalanceRequest, LinkAccountsRequest}
+import models.request.{CheckBalanceRequest, LinkAccountsRequest, MakePaymentRequest}
 import models.response.LinkAccountsResponse
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads}
@@ -66,11 +66,17 @@ class NsiController @Inject() (
     }
   }
 
-  def payment(): Action[JsValue] = correlate(parse.json) { _ =>
-    Ok(Json.obj(
-      "payment_reference"      -> randomPaymentRef,
-      "estimated_payment_date" -> randomDate
-    ))
+  def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
+    withJsonBody { body: MakePaymentRequest =>
+      withNsiErrorScenarios(body.parent_nino) {
+        Ok(
+          Json.obj(
+            "payment_reference"      -> randomPaymentRef,
+            "estimated_payment_date" -> randomDate
+          )
+        )
+      }
+    }
   }
 
   private def withNsiErrorScenarios(parentNino: String)(block: => Result) =

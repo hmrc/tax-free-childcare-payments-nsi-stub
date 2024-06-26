@@ -38,7 +38,7 @@ final case class MakePaymentScenario(
     "eppURN"                 -> epp_urn,
     "eppAccount"             -> epp_account,
     "parentNino"             -> parent_nino,
-    "payeeType"              -> (if (ccp_opt.isDefined) "ccp" else "epp"),
+    "payeeType"              -> (if (ccp_opt.isDefined) "CCP" else "EPP"),
     "ccpURN"                 -> ccp_opt.map(_.urn),
     "ccpPostcode"            -> ccp_opt.map(_.postcode),
     "paymentAmount"          -> payment_amount
