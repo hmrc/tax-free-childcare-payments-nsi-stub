@@ -17,7 +17,8 @@
 package controllers
 
 import base.Generators
-import play.api.libs.json.{JsObject, Json}
+import models.response.LinkAccountsResponse
+import play.api.libs.json.{JsObject, Json, Reads, __}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -53,4 +54,7 @@ object LinkAccountsScenario extends Generators {
       epp_account    <- nonEmptyAlphaNumStrings
       child_age_days <- Gen.chooseNum(0, 18 * 365)
     } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, LocalDate.now() minusDays child_age_days)
+
+  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
+  val expectedResponseFormat: Reads[LinkAccountsResponse] = (__ \ "childFullName").read[String] map LinkAccountsResponse.apply
 }

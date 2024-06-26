@@ -18,7 +18,8 @@ package controllers
 
 import base.Generators
 import models.request.ChildCareProvider
-import play.api.libs.json.{JsObject, Json}
+import models.response.MakePaymentResponse
+import play.api.libs.json._
 
 import java.util.UUID
 
@@ -47,6 +48,9 @@ final case class MakePaymentScenario(
 
 object MakePaymentScenario extends Generators {
   import org.scalacheck.Gen
+  import play.api.libs.functional.syntax.toFunctionalBuilderOps
+
+  import java.time.LocalDate
 
   val genWithRandomNino: Gen[MakePaymentScenario] = ninos flatMap genWithFixedNino
 
@@ -59,4 +63,10 @@ object MakePaymentScenario extends Generators {
       ccp_opt        <- Gen option childCareProviders
       payment_amount <- Gen.posNum[Int]
     } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, ccp_opt, payment_amount)
+
+  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
+  val expectedResponseFormat: Reads[MakePaymentResponse] = (
+    (__ \ "paymentReference").read[String] ~
+      (__ \ "paymentDate").read[LocalDate]
+  )(MakePaymentResponse.apply _)
 }
