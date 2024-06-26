@@ -18,6 +18,7 @@ package controllers
 
 import base.Generators
 import models.request.CheckBalanceRequest
+import models.response.CheckBalanceResponse
 
 import java.util.UUID
 
@@ -35,7 +36,10 @@ final case class CheckBalanceScenario(
 }
 
 object CheckBalanceScenario extends Generators {
+  import CheckBalanceResponse.AccountStatus
   import org.scalacheck.Gen
+  import play.api.libs.functional.syntax.toFunctionalBuilderOps
+  import play.api.libs.json.{__, Reads}
 
   val genWithRandomNino: Gen[CheckBalanceScenario] = ninos flatMap genWithFixedNino
 
@@ -46,4 +50,14 @@ object CheckBalanceScenario extends Generators {
       epp_urn        <- nonEmptyAlphaNumStrings
       epp_account    <- nonEmptyAlphaNumStrings
     } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino)
+
+  /** This should match the API spec in <https://docs.google.com/document/d/10ULaEScNhaAZqFf1hEzxseJB2u_a2GgS>. */
+  val expectedResponseFormat: Reads[CheckBalanceResponse] = (
+    (__ \ "accountStatus").read[AccountStatus.Value] ~
+      (__ \ "topUpAvailable").read[Int] ~
+      (__ \ "topUpRemaining").read[Int] ~
+      (__ \ "paidIn").read[Int] ~
+      (__ \ "totalBalance").read[Int] ~
+      (__ \ "clearedFunds").read[Int]
+  )(CheckBalanceResponse.apply _)
 }

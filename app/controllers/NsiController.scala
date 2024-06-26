@@ -24,7 +24,8 @@ import scala.util.Random
 import models.ErrorResponse
 import models.ErrorResponse.Code._
 import models.request.{CheckBalanceRequest, LinkAccountsRequest, MakePaymentRequest}
-import models.response.LinkAccountsResponse
+import models.response.CheckBalanceResponse.AccountStatus
+import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.mvc._
@@ -54,13 +55,15 @@ class NsiController @Inject() (
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(requestData.parent_nino) {
       Ok(
-        Json.obj(
-          "tfc_account_status" -> "active",
-          "paid_in_by_you"     -> randomSumOfMoney,
-          "government_top_up"  -> randomSumOfMoney,
-          "total_balance"      -> randomSumOfMoney,
-          "cleared_funds"      -> randomSumOfMoney,
-          "top_up_allowance"   -> randomSumOfMoney
+        Json.toJson(
+          CheckBalanceResponse(
+            AccountStatus.values.toArray.apply(Random.nextInt(AccountStatus.values.knownSize)),
+            randomSumOfMoney,
+            randomSumOfMoney,
+            randomSumOfMoney,
+            randomSumOfMoney,
+            randomSumOfMoney
+          )
         )
       )
     }
@@ -70,9 +73,8 @@ class NsiController @Inject() (
     withJsonBody { body: MakePaymentRequest =>
       withNsiErrorScenarios(body.parent_nino) {
         Created(
-          Json.obj(
-            "payment_reference"      -> randomPaymentRef,
-            "estimated_payment_date" -> randomDate
+          Json.toJson(
+            MakePaymentResponse(randomPaymentRef, randomDate)
           )
         )
       }
@@ -95,7 +97,7 @@ class NsiController @Inject() (
 }
 
 object NsiController {
-  private def randomSumOfMoney = BigDecimal(Random.nextInt(MAX_SUM_OF_MONEY_PENCE)).setScale(2) / 100
+  private def randomSumOfMoney = Random.nextInt(MAX_SUM_OF_MONEY_PENCE)
   private def randomDate       = LocalDate.now() plusDays randomPaymentDelayDays
   private def randomPaymentRef = Array.fill(PAYMENT_REF_LENGTH)(randomDigit).mkString
 

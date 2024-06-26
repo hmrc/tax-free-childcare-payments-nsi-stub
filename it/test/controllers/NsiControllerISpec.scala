@@ -17,7 +17,6 @@
 package controllers
 
 import base.JsonGenerators
-import org.scalatest.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -25,10 +24,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status
-import play.api.libs.ws.WSResponse
 import play.api.test.WsTestClient
-
-import java.util.UUID
 
 class NsiControllerISpec
     extends AnyWordSpec
@@ -82,7 +78,9 @@ class NsiControllerISpec
               .futureValue
 
             response.status shouldBe CREATED
-            assert((response.json \ "childFullName").isDefined)
+
+            val jsonResult = response.json validate LinkAccountsScenario.expectedResponseFormat
+            assert(jsonResult.isSuccess)
           }
       }
 
@@ -118,6 +116,9 @@ class NsiControllerISpec
               .futureValue
 
             response.status shouldBe OK
+
+            val jsonResult = response.json validate CheckBalanceScenario.expectedResponseFormat
+            assert(jsonResult.isSuccess)
           }
       }
 
@@ -153,6 +154,9 @@ class NsiControllerISpec
               .futureValue
 
             response.status shouldBe CREATED
+
+            val jsonResult = response.json validate MakePaymentScenario.expectedResponseFormat
+            assert(jsonResult.isSuccess)
           }
       }
 
