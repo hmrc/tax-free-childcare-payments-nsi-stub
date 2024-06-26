@@ -69,7 +69,7 @@ class NsiController @Inject() (
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
     withJsonBody { body: MakePaymentRequest =>
       withNsiErrorScenarios(body.parent_nino) {
-        Ok(
+        Created(
           Json.obj(
             "payment_reference"      -> randomPaymentRef,
             "estimated_payment_date" -> randomDate
