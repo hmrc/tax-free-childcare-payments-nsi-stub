@@ -36,7 +36,7 @@ object MakePaymentRequest extends ConstraintReads {
       (__ \ "eppAccount").read(minLength[String](1)) ~
       (__ \ "parentNino").read(pattern(NINO_PATTERN)) ~
       readsOptCCP ~
-      (__ \ "paymentAmount").read[Int](min(1))
+      (__ \ "amount").read[Int](min(1))
   )(apply _)
 
   private lazy val readsOptCCP = (__ \ "payeeType").read[PayeeType.Value] flatMap readOptCCP

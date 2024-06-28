@@ -42,7 +42,7 @@ final case class MakePaymentScenario(
     "payeeType"              -> (if (ccp_opt.isDefined) "CCP" else "EPP"),
     "ccpURN"                 -> ccp_opt.map(_.urn),
     "ccpPostcode"            -> ccp_opt.map(_.postcode),
-    "paymentAmount"          -> payment_amount
+    "amount"                 -> payment_amount
   )
 }
 
