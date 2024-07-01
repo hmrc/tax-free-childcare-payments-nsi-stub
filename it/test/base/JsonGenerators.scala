@@ -23,11 +23,11 @@ import scala.util.Random
 
 trait JsonGenerators {
 
-  def randomSharedRequestDataJsonWithNino(nino: String): JsObject = Json.obj(
+  def sharedRequestData(outboundChildPaymentRef: String): JsObject = Json.obj(
     "epp_unique_customer_id"     -> randomStringOf(16, alphaNumChars),
     "epp_reg_reference"          -> randomStringOf(11, alphaNumChars),
-    "outbound_child_payment_ref" -> randomStringOf(12, alphaNumChars),
-    "nino"                       -> nino
+    "outbound_child_payment_ref" -> outboundChildPaymentRef,
+    "nino"                       -> "AA110000A"
   )
 
   private def randomStringOf[A: ClassTag](n: Int, elems: Seq[A]) = {
