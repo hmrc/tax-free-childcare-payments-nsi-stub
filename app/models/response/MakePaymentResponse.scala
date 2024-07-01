@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package models
+package models.response
 
-import play.api.libs.json.{Json, Reads}
+import java.time.LocalDate
 
-case class SharedRequestData(
-    epp_unique_customer_id: String,
-    epp_reg_reference: String,
-    outbound_child_payment_ref: String,
-    nino: String
+final case class MakePaymentResponse(
+    payment_ref: String,
+    payment_date: LocalDate
   )
 
-object SharedRequestData {
-  implicit val reads: Reads[SharedRequestData] = Json.reads
+object MakePaymentResponse {
+  import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+  import play.api.libs.json.{OWrites, __}
+
+  /** This should match the API spec in <https://docs.google.com/document/d/1N3wV9LaPhvk5bKvJQliTegtu7o_kBwFq>. */
+  implicit val writes: OWrites[MakePaymentResponse] = (
+    (__ \ "paymentReference").write[String] ~
+      (__ \ "paymentDate").write[LocalDate]
+  )(unlift(unapply))
 }
