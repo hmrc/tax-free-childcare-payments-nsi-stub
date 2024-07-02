@@ -33,7 +33,7 @@ object CheckBalanceResponse {
   import play.api.libs.json.{__, Json, OWrites}
 
   object AccountStatus extends Enumeration {
-    val ACTIVE, BLOCKED, CLOSED = Value
+    val ACTIVE, BLOCKED = Value
 
     implicit val format: Format[AccountStatus.Value] = Json.formatEnum(this)
   }
