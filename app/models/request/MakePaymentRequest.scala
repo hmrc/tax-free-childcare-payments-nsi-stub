@@ -30,13 +30,14 @@ final case class MakePaymentRequest(
 
 object MakePaymentRequest extends ConstraintReads {
 
+  /** This should match the API spec in <https://docs.google.com/document/d/1Z8mPFoOJQbkELv_3PSnODyaicL0Gx17P>. */
   implicit val reads: Reads[MakePaymentRequest] = (
     (__ \ "childAccountPaymentRef").read(minLength[String](1)) ~
       (__ \ "eppURN").read(minLength[String](1)) ~
       (__ \ "eppAccount").read(minLength[String](1)) ~
       (__ \ "parentNino").read(pattern(NINO_PATTERN)) ~
       readsOptCCP ~
-      (__ \ "paymentAmount").read[Int](min(1))
+      (__ \ "amount").read[Int](min(1))
   )(apply _)
 
   private lazy val readsOptCCP = (__ \ "payeeType").read[PayeeType.Value] flatMap readOptCCP
