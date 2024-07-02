@@ -21,10 +21,13 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.util.Random
 
+import models.ErrorResponse
 import models.ErrorResponse.Code._
-import models.{ErrorResponse, SharedRequestData}
-
-import play.api.libs.json.{JsValue, Json}
+import models.request.{CheckBalanceRequest, LinkAccountsRequest, MakePaymentRequest}
+import models.response.CheckBalanceResponse.AccountStatus
+import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -32,53 +35,69 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 class NsiController @Inject() (
     cc: ControllerComponents,
     correlate: CorrelationIdAction
-  ) extends BackendController(cc) {
+  ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(): Action[JsValue] = withNsiErrorScenarios { sharedRequestData =>
-    Ok(Json.obj(
-      "child_full_name" -> testChildren(sharedRequestData.nino.last)
-    ))
-  }
-
-  def balance(): Action[JsValue] = withNsiErrorScenarios { _ =>
-    Ok(Json.obj(
-      "tfc_account_status" -> "active",
-      "paid_in_by_you"     -> randomSumOfMoney,
-      "government_top_up"  -> randomSumOfMoney,
-      "total_balance"      -> randomSumOfMoney,
-      "cleared_funds"      -> randomSumOfMoney,
-      "top_up_allowance"   -> randomSumOfMoney
-    ))
-  }
-
-  def payment(): Action[JsValue] = withNsiErrorScenarios { _ =>
-    Ok(Json.obj(
-      "payment_reference"      -> randomPaymentRef,
-      "estimated_payment_date" -> randomDate
-    ))
-  }
-
-  private def withNsiErrorScenarios(block: SharedRequestData => Result) =
-    correlate.async(parse.json) { implicit request =>
-      withJsonBody[SharedRequestData] { sharedRequestData =>
-        Future.successful(
-          testErrorScenarios get sharedRequestData.nino match {
-            case Some(nsiErrorCode) =>
-              new Status(nsiErrorCode.statusCode)(
-                Json.toJson(
-                  ErrorResponse(nsiErrorCode, "asdf")
-                )
-              )
-            case None               => block(sharedRequestData)
-          }
+  def link(accountRef: String): Action[JsValue] = correlate(parse.json).async { implicit req =>
+    withJsonBody { body: LinkAccountsRequest =>
+      withNsiErrorScenarios(body.parent_nino) {
+        Created(
+          Json.toJson(
+            LinkAccountsResponse(
+              testChildren(body.parent_nino.last)
+            )
+          )
         )
       }
     }
+  }
+
+  def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
+    withNsiErrorScenarios(requestData.parent_nino) {
+      Ok(
+        Json.toJson(
+          CheckBalanceResponse(
+            AccountStatus.values.toArray.apply(Random.nextInt(AccountStatus.values.knownSize)),
+            randomSumOfMoney,
+            randomSumOfMoney,
+            randomSumOfMoney,
+            randomSumOfMoney,
+            randomSumOfMoney
+          )
+        )
+      )
+    }
+  }
+
+  def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
+    withJsonBody { body: MakePaymentRequest =>
+      withNsiErrorScenarios(body.parent_nino) {
+        Created(
+          Json.toJson(
+            MakePaymentResponse(randomPaymentRef, randomDate)
+          )
+        )
+      }
+    }
+  }
+
+  private def withNsiErrorScenarios(parentNino: String)(block: => Result) =
+    testErrorScenarios get parentNino match {
+      case Some(nsiErrorCode) =>
+        new Status(nsiErrorCode.statusCode)(
+          Json.toJson(
+            ErrorResponse(nsiErrorCode, "asdf")
+          )
+        )
+      case None               => block
+    }
+
+  private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
+    withJsonBody(f andThen Future.successful)
 }
 
 object NsiController {
-  private def randomSumOfMoney = BigDecimal(Random.nextInt(MAX_SUM_OF_MONEY_PENCE)).setScale(2) / 100
+  private def randomSumOfMoney = Random.nextInt(MAX_SUM_OF_MONEY_PENCE)
   private def randomDate       = LocalDate.now() plusDays randomPaymentDelayDays
   private def randomPaymentRef = Array.fill(PAYMENT_REF_LENGTH)(randomDigit).mkString
 
