@@ -44,25 +44,42 @@ class NsiControllerISpec
 
   private val errorScenarios = Table(
     ("Expected Error Code", "Expected Status Code", "Outbound Child Payment Ref"),
-    ("E0000", 400, "EEAA00000TFC"),
-    ("E0001", 400, "EEBB00000TFC"),
-    ("E0002", 400, "EECC00000TFC"),
-    ("E0003", 400, "EEDD00000TFC"),
-    ("E0004", 400, "EEEE00000TFC"),
-    ("E0005", 400, "EEFF00000TFC"),
-    ("E0006", 400, "EEGG00000TFC"),
-    ("E0007", 400, "EEHH00000TFC"),
-    ("E0008", 400, "EEII00000TFC"),
-    ("E0009", 400, "EEJJ00000TFC"),
-    ("E0010", 400, "EEKK00000TFC"),
-    ("E0020", 400, "EELL00000TFC"),
-    ("E0021", 400, "EEMM00000TFC"),
-    ("E0022", 400, "EENN00000TFC"),
-    ("E0024", 400, "EEOO00000TFC"),
-    ("E9000", 500, "EEPP00000TFC"),
-    ("E9999", 500, "EEQQ00000TFC"),
-    ("E8000", 503, "EERR00000TFC"),
-    ("E8001", 503, "EESS00000TFC")
+    ("E0000", 500, "EEAA00000TFC"),
+    ("E0001", 500, "EEBB00000TFC"),
+    ("E0002", 500, "EECC00000TFC"),
+    ("E0003", 500, "EEDD00000TFC"),
+    ("E0004", 500, "EEEE00000TFC"),
+    ("E0005", 500, "EEFF00000TFC"),
+    ("E0006", 500, "EEGG00000TFC"),
+    ("E0007", 500, "EEHH00000TFC"),
+    ("E0008", 500, "EEII00000TFC"),
+
+    ("E0020", 502, "EELL00000TFC"),
+    ("E0021", 500, "EEMM00000TFC"),
+    ("E0022", 500, "EENN00000TFC"),
+    ("E0023", 500, "EEOO00000TFC"),
+    ("E0024", 400, "EEPP00000TFC"),
+    ("E0025", 400, "EEQQ00000TFC"),
+    ("E0026", 400, "EERR00000TFC"),
+
+    ("E0401", 500, "EESS00000TFC"),
+
+    ("E0030", 400, "EETT00000TFC"),
+    ("E0031", 400, "EEUU00000TFC"),
+    ("E0032", 400, "EEVV00000TFC"),
+    ("E0033", 400, "EEWW00000TFC"),
+    ("E0034", 503, "EEXX00000TFC"),
+    ("E0035", 400, "EEYY00000TFC"),
+
+    ("E0040", 400, "EEZZ00000TFC"),
+    ("E0041", 400, "EEBA00000TFC"),
+    ("E0042", 400, "EEBC00000TFC"),
+    ("E0043", 400, "EEBD00000TFC"),
+
+    ("E9000", 503, "EEBE00000TFC"),
+    ("E9999", 503, "EEBF00000TFC"),
+    ("E8000", 503, "EEBG00000TFC"),
+    ("E8001", 503, "EEBH00000TFC")
   )
 
   val link_url = "/account/v1/accounts/link-to-EPP"
