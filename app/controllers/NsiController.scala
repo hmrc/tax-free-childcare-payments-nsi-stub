@@ -38,22 +38,20 @@ class NsiController @Inject() (
   ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(accountRef: String): Action[JsValue] = correlate(parse.json).async { implicit req =>
-    withJsonBody { body: LinkAccountsRequest =>
-      withNsiErrorScenarios(body.parent_nino) {
-        Created(
-          Json.toJson(
-            LinkAccountsResponse(
-              testChildren(body.parent_nino.last)
-            )
+  def link(accountRef: String): Action[JsValue] = correlate(parse.json) { implicit req =>
+    withNsiErrorScenarios(accountRef) {
+      Created(
+        Json.toJson(
+          LinkAccountsResponse(
+            testChildren(accountRef take 4)
           )
         )
-      }
+      )
     }
   }
 
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(requestData.parent_nino) {
+    withNsiErrorScenarios(accountRef) {
       Ok(
         Json.toJson(
           CheckBalanceResponse(
@@ -71,7 +69,7 @@ class NsiController @Inject() (
 
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
     withJsonBody { body: MakePaymentRequest =>
-      withNsiErrorScenarios(body.parent_nino) {
+      withNsiErrorScenarios(body.tfc_account_ref) {
         Created(
           Json.toJson(
             MakePaymentResponse(randomPaymentRef, randomDate)
@@ -81,8 +79,8 @@ class NsiController @Inject() (
     }
   }
 
-  private def withNsiErrorScenarios(parentNino: String)(block: => Result) =
-    testErrorScenarios get parentNino match {
+  private def withNsiErrorScenarios(accountRef: String)(block: => Result) =
+    testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
         new Status(nsiErrorCode.statusCode)(
           Json.toJson(
@@ -108,31 +106,31 @@ object NsiController {
   private val PAYMENT_REF_LENGTH     = 16
 
   private val testChildren = Map(
-    'A' -> "Peter Pan",
-    'B' -> "Benjamin Button",
-    'C' -> "Christopher Columbus",
-    'D' -> "Donald Duck"
+    "AAAA" -> "Peter Pan",
+    "AABB" -> "Benjamin Button",
+    "AACC" -> "Christopher Columbus",
+    "AADD" -> "Donald Duck"
   )
 
   private val testErrorScenarios = Map(
-    "AA110000A" -> E0000,
-    "AA110001A" -> E0001,
-    "AA110002A" -> E0002,
-    "AA110003A" -> E0003,
-    "AA110004A" -> E0004,
-    "AA110005A" -> E0005,
-    "AA110006A" -> E0006,
-    "AA110007A" -> E0007,
-    "AA110008A" -> E0008,
-    "AA110009A" -> E0009,
-    "AA110010A" -> E0010,
-    "AA110020A" -> E0020,
-    "AA110021A" -> E0021,
-    "AA110022A" -> E0022,
-    "AA110024A" -> E0024,
-    "AA119000A" -> E9000,
-    "AA119999A" -> E9999,
-    "AA118000A" -> E8000,
-    "AA118001A" -> E8001
+    "EEAA" -> E0000,
+    "EEBB" -> E0001,
+    "EECC" -> E0002,
+    "EEDD" -> E0003,
+    "EEEE" -> E0004,
+    "EEFF" -> E0005,
+    "EEGG" -> E0006,
+    "EEHH" -> E0007,
+    "EEII" -> E0008,
+    "EEJJ" -> E0009,
+    "EEKK" -> E0010,
+    "EELL" -> E0020,
+    "EEMM" -> E0021,
+    "EENN" -> E0022,
+    "EEOO" -> E0024,
+    "EEPP" -> E9000,
+    "EEQQ" -> E9999,
+    "EERR" -> E8000,
+    "EESS" -> E8001
   )
 }

@@ -43,26 +43,26 @@ class NsiControllerISpec
   private val CORRELATION_ID = "correlationId"
 
   private val errorScenarios = Table(
-    ("Expected Error Code", "Expected Status Code", "NI Number"),
-    ("E0000", 400, "AA110000A"),
-    ("E0001", 400, "AA110001A"),
-    ("E0002", 400, "AA110002A"),
-    ("E0003", 400, "AA110003A"),
-    ("E0004", 400, "AA110004A"),
-    ("E0005", 400, "AA110005A"),
-    ("E0006", 400, "AA110006A"),
-    ("E0007", 400, "AA110007A"),
-    ("E0008", 400, "AA110008A"),
-    ("E0009", 400, "AA110009A"),
-    ("E0010", 400, "AA110010A"),
-    ("E0020", 400, "AA110020A"),
-    ("E0021", 400, "AA110021A"),
-    ("E0022", 400, "AA110022A"),
-    ("E0024", 400, "AA110024A"),
-    ("E9000", 500, "AA119000A"),
-    ("E9999", 500, "AA119999A"),
-    ("E8000", 503, "AA118000A"),
-    ("E8001", 503, "AA118001A")
+    ("Expected Error Code", "Expected Status Code", "Outbound Child Payment Ref"),
+    ("E0000", 400, "EEAA00000TFC"),
+    ("E0001", 400, "EEBB00000TFC"),
+    ("E0002", 400, "EECC00000TFC"),
+    ("E0003", 400, "EEDD00000TFC"),
+    ("E0004", 400, "EEEE00000TFC"),
+    ("E0005", 400, "EEFF00000TFC"),
+    ("E0006", 400, "EEGG00000TFC"),
+    ("E0007", 400, "EEHH00000TFC"),
+    ("E0008", 400, "EEII00000TFC"),
+    ("E0009", 400, "EEJJ00000TFC"),
+    ("E0010", 400, "EEKK00000TFC"),
+    ("E0020", 400, "EELL00000TFC"),
+    ("E0021", 400, "EEMM00000TFC"),
+    ("E0022", 400, "EENN00000TFC"),
+    ("E0024", 400, "EEOO00000TFC"),
+    ("E9000", 500, "EEPP00000TFC"),
+    ("E9999", 500, "EEQQ00000TFC"),
+    ("E8000", 503, "EERR00000TFC"),
+    ("E8001", 503, "EESS00000TFC")
   )
 
   val link_url = "/account/v1/accounts/link-to-EPP"
