@@ -52,14 +52,14 @@ object MakePaymentScenario extends Generators {
 
   import java.time.LocalDate
 
-  val genWithRandomNino: Gen[MakePaymentScenario] = ninos flatMap genWithFixedNino
+  val random: Gen[MakePaymentScenario] = nonEmptyAlphaNumStrings flatMap withFixedAccountRef
 
-  def genWithFixedNino(nino: String): Gen[MakePaymentScenario] =
+  def withFixedAccountRef(account_ref: String): Gen[MakePaymentScenario] =
     for {
       correlation_id <- Gen.uuid
-      account_ref    <- nonEmptyAlphaNumStrings
       epp_urn        <- nonEmptyAlphaNumStrings
       epp_account    <- nonEmptyAlphaNumStrings
+      nino           <- ninos
       ccp_opt        <- Gen option childCareProviders
       payment_amount <- Gen.posNum[Int]
     } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, ccp_opt, payment_amount)

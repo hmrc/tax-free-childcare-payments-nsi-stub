@@ -124,10 +124,10 @@ class NsiControllerISpec
       }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given nino $nino" in withClient { ws =>
-          forAll(CheckBalanceScenario withFixedAccountRef nino) { scenario =>
+        s"given child payment ref $accountRef" in withClient { ws =>
+          forAll(CheckBalanceScenario withFixedAccountRef accountRef) { scenario =>
             val response =
               ws
                 .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
@@ -149,7 +149,7 @@ class NsiControllerISpec
   s"POST $payment_url" should {
     s"respond $CREATED and echo the correlation ID in the response header" when {
       "request contains valid correlation ID header" in withClient { ws =>
-        forAll(MakePaymentScenario.genWithRandomNino) { scenario =>
+        forAll(MakePaymentScenario.random) { scenario =>
           val response = ws
             .url(s"$baseUrl$payment_url")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -164,10 +164,10 @@ class NsiControllerISpec
       }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given nino $nino" in withClient { ws =>
-          forAll(MakePaymentScenario genWithFixedNino nino) { scenario =>
+        s"given child payment ref $accountRef" in withClient { ws =>
+          forAll(MakePaymentScenario withFixedAccountRef accountRef) { scenario =>
             val response = ws
               .url(s"$baseUrl$payment_url")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
