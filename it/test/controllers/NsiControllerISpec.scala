@@ -109,7 +109,7 @@ class NsiControllerISpec
   s"GET $balance_url" should {
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains valid correlation ID header" in withClient { ws =>
-        forAll(CheckBalanceScenario.genWithRandomNino) { scenario =>
+        forAll(CheckBalanceScenario.random) { scenario =>
           val response = ws
             .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -127,7 +127,7 @@ class NsiControllerISpec
     forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
       s"respond with status code $expectedStatusCode" when {
         s"given nino $nino" in withClient { ws =>
-          forAll(CheckBalanceScenario genWithFixedNino nino) { scenario =>
+          forAll(CheckBalanceScenario withFixedAccountRef nino) { scenario =>
             val response =
               ws
                 .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
