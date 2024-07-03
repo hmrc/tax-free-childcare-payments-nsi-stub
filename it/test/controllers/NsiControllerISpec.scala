@@ -70,7 +70,7 @@ class NsiControllerISpec
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in
         withClient { ws =>
-          forAll(LinkAccountsScenario.genWithRandomNino) { scenario =>
+          forAll(LinkAccountsScenario.random) { scenario =>
             val response = ws
               .url(s"$baseUrl$link_url/${scenario.account_ref}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -85,10 +85,10 @@ class NsiControllerISpec
         }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given nino $nino" in withClient { ws =>
-          forAll(LinkAccountsScenario genWithFixedNino nino) { scenario =>
+        s"given child payment ref $accountRef" in withClient { ws =>
+          forAll(LinkAccountsScenario withFixedAccountRef accountRef) { scenario =>
             val response = ws
               .url(s"$baseUrl$link_url/${scenario.account_ref}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
