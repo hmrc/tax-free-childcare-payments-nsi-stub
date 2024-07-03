@@ -16,12 +16,13 @@
 
 package controllers
 
-import com.google.inject.Inject
-import play.api.http.Status
-import play.api.mvc._
-
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
+
+import com.google.inject.Inject
+
+import play.api.http.Status
+import play.api.mvc._
 
 @Singleton
 class CorrelationIdAction @Inject() (
