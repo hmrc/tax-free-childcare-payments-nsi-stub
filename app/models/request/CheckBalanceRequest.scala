@@ -17,7 +17,7 @@
 package models.request
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{Reads, __}
 import play.api.mvc.QueryStringBindable
 
 final case class CheckBalanceRequest(epp_urn: String, epp_account: String, parent_nino: String)

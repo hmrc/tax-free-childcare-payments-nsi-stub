@@ -17,6 +17,7 @@
 package models.response
 
 import models.response.CheckBalanceResponse.AccountStatus
+
 import play.api.libs.json.Format
 
 final case class CheckBalanceResponse(

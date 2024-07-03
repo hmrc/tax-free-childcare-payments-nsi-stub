@@ -44,14 +44,18 @@ final case class LinkAccountsScenario(
 object LinkAccountsScenario extends Generators {
   import org.scalacheck.Gen
 
-  val genWithRandomNino: Gen[LinkAccountsScenario] = ninos flatMap genWithFixedNino
+  val random: Gen[LinkAccountsScenario] = for {
+    accountRefInit <- Gen oneOf Array("AAAA","AABB","AACC","AADD")
+    accountRefTail <- nonEmptyAlphaNumStrings
+    scenario <- withFixedAccountRef(accountRefInit + accountRefTail)
+  } yield scenario
 
-  def genWithFixedNino(nino: String): Gen[LinkAccountsScenario] =
+  def withFixedAccountRef(account_ref: String): Gen[LinkAccountsScenario] =
     for {
       correlation_id <- Gen.uuid
-      account_ref    <- nonEmptyAlphaNumStrings
       epp_urn        <- nonEmptyAlphaNumStrings
       epp_account    <- nonEmptyAlphaNumStrings
+      nino           <- ninos
       child_age_days <- Gen.chooseNum(0, 18 * 365)
     } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, LocalDate.now() minusDays child_age_days)
 

@@ -43,34 +43,51 @@ class NsiControllerISpec
   private val CORRELATION_ID = "correlationId"
 
   private val errorScenarios = Table(
-    ("Expected Error Code", "Expected Status Code", "NI Number"),
-    ("E0000", 400, "AA110000A"),
-    ("E0001", 400, "AA110001A"),
-    ("E0002", 400, "AA110002A"),
-    ("E0003", 400, "AA110003A"),
-    ("E0004", 400, "AA110004A"),
-    ("E0005", 400, "AA110005A"),
-    ("E0006", 400, "AA110006A"),
-    ("E0007", 400, "AA110007A"),
-    ("E0008", 400, "AA110008A"),
-    ("E0009", 400, "AA110009A"),
-    ("E0010", 400, "AA110010A"),
-    ("E0020", 400, "AA110020A"),
-    ("E0021", 400, "AA110021A"),
-    ("E0022", 400, "AA110022A"),
-    ("E0024", 400, "AA110024A"),
-    ("E9000", 500, "AA119000A"),
-    ("E9999", 500, "AA119999A"),
-    ("E8000", 503, "AA118000A"),
-    ("E8001", 503, "AA118001A")
+    ("Expected Error Code", "Expected Status Code", "Outbound Child Payment Ref"),
+    ("E0000", 500, "EEAA00000TFC"),
+    ("E0001", 500, "EEBB00000TFC"),
+    ("E0002", 500, "EECC00000TFC"),
+    ("E0003", 500, "EEDD00000TFC"),
+    ("E0004", 500, "EEEE00000TFC"),
+    ("E0005", 500, "EEFF00000TFC"),
+    ("E0006", 500, "EEGG00000TFC"),
+    ("E0007", 500, "EEHH00000TFC"),
+    ("E0008", 500, "EEII00000TFC"),
+
+    ("E0020", 502, "EELL00000TFC"),
+    ("E0021", 500, "EEMM00000TFC"),
+    ("E0022", 500, "EENN00000TFC"),
+    ("E0023", 500, "EEOO00000TFC"),
+    ("E0024", 400, "EEPP00000TFC"),
+    ("E0025", 400, "EEQQ00000TFC"),
+    ("E0026", 400, "EERR00000TFC"),
+
+    ("E0401", 500, "EESS00000TFC"),
+
+    ("E0030", 400, "EETT00000TFC"),
+    ("E0031", 400, "EEUU00000TFC"),
+    ("E0032", 400, "EEVV00000TFC"),
+    ("E0033", 400, "EEWW00000TFC"),
+    ("E0034", 503, "EEXX00000TFC"),
+    ("E0035", 400, "EEYY00000TFC"),
+
+    ("E0040", 400, "EEZZ00000TFC"),
+    ("E0041", 400, "EEBA00000TFC"),
+    ("E0042", 400, "EEBC00000TFC"),
+    ("E0043", 400, "EEBD00000TFC"),
+
+    ("E9000", 503, "EEBE00000TFC"),
+    ("E9999", 503, "EEBF00000TFC"),
+    ("E8000", 503, "EEBG00000TFC"),
+    ("E8001", 503, "EEBH00000TFC")
   )
 
   val link_url = "/account/v1/accounts/link-to-EPP"
   s"POST $link_url/:ref" should {
     s"respond $OK and echo the correlation ID in the response header" when {
-      "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in
+      "request contains a valid correlation ID header and expected JSON fields are present and account ref starts with AAAA, AABB, AACC, or AADD" in
         withClient { ws =>
-          forAll(LinkAccountsScenario.genWithRandomNino) { scenario =>
+          forAll(LinkAccountsScenario.random) { scenario =>
             val response = ws
               .url(s"$baseUrl$link_url/${scenario.account_ref}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -85,10 +102,10 @@ class NsiControllerISpec
         }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given nino $nino" in withClient { ws =>
-          forAll(LinkAccountsScenario genWithFixedNino nino) { scenario =>
+        s"given child payment ref $accountRef" in withClient { ws =>
+          forAll(LinkAccountsScenario withFixedAccountRef accountRef) { scenario =>
             val response = ws
               .url(s"$baseUrl$link_url/${scenario.account_ref}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -109,7 +126,7 @@ class NsiControllerISpec
   s"GET $balance_url" should {
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains valid correlation ID header" in withClient { ws =>
-        forAll(CheckBalanceScenario.genWithRandomNino) { scenario =>
+        forAll(CheckBalanceScenario.random) { scenario =>
           val response = ws
             .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -124,10 +141,10 @@ class NsiControllerISpec
       }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given nino $nino" in withClient { ws =>
-          forAll(CheckBalanceScenario genWithFixedNino nino) { scenario =>
+        s"given child payment ref $accountRef" in withClient { ws =>
+          forAll(CheckBalanceScenario withFixedAccountRef accountRef) { scenario =>
             val response =
               ws
                 .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
@@ -149,7 +166,7 @@ class NsiControllerISpec
   s"POST $payment_url" should {
     s"respond $CREATED and echo the correlation ID in the response header" when {
       "request contains valid correlation ID header" in withClient { ws =>
-        forAll(MakePaymentScenario.genWithRandomNino) { scenario =>
+        forAll(MakePaymentScenario.random) { scenario =>
           val response = ws
             .url(s"$baseUrl$payment_url")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -164,10 +181,10 @@ class NsiControllerISpec
       }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, nino) =>
+    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given nino $nino" in withClient { ws =>
-          forAll(MakePaymentScenario genWithFixedNino nino) { scenario =>
+        s"given child payment ref $accountRef" in withClient { ws =>
+          forAll(MakePaymentScenario withFixedAccountRef accountRef) { scenario =>
             val response = ws
               .url(s"$baseUrl$payment_url")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)

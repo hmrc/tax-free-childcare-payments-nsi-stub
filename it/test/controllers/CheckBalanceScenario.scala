@@ -41,15 +41,15 @@ object CheckBalanceScenario extends Generators {
   import play.api.libs.functional.syntax.toFunctionalBuilderOps
   import play.api.libs.json.{__, Reads}
 
-  val genWithRandomNino: Gen[CheckBalanceScenario] = ninos flatMap genWithFixedNino
+  val random: Gen[CheckBalanceScenario] = nonEmptyAlphaNumStrings flatMap withFixedAccountRef
 
-  def genWithFixedNino(nino: String): Gen[CheckBalanceScenario] =
+  def withFixedAccountRef(accountRef: String): Gen[CheckBalanceScenario] =
     for {
       correlation_id <- Gen.uuid
-      account_ref    <- nonEmptyAlphaNumStrings
       epp_urn        <- nonEmptyAlphaNumStrings
       epp_account    <- nonEmptyAlphaNumStrings
-    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino)
+      nino           <- ninos
+    } yield apply(correlation_id, accountRef, epp_urn, epp_account, nino)
 
   /** This should match the API spec in <https://docs.google.com/document/d/10ULaEScNhaAZqFf1hEzxseJB2u_a2GgS>. */
   val expectedResponseFormat: Reads[CheckBalanceResponse] = (

@@ -16,10 +16,10 @@
 
 package models.request
 
+import java.time.LocalDate
+
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Reads, __}
-
-import java.time.LocalDate
 
 final case class LinkAccountsRequest(
     epp_urn: String,
