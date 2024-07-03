@@ -68,7 +68,7 @@ class NsiControllerISpec
   val link_url = "/account/v1/accounts/link-to-EPP"
   s"POST $link_url/:ref" should {
     s"respond $OK and echo the correlation ID in the response header" when {
-      "request contains a valid correlation ID header and expected JSON fields are present and NINO ends in [A-D]" in
+      "request contains a valid correlation ID header and expected JSON fields are present and account ref starts with AAAA, AABB, AACC, or AADD" in
         withClient { ws =>
           forAll(LinkAccountsScenario.random) { scenario =>
             val response = ws
