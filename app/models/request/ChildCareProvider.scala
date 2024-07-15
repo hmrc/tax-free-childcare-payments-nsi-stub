@@ -19,9 +19,10 @@ package models.request
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{ConstraintReads, Reads, __}
 
-final case class ChildCareProvider (urn: String, postcode: String)
+final case class ChildCareProvider(urn: String, postcode: String)
 
 object ChildCareProvider extends ConstraintReads {
+
   implicit val reads: Reads[ChildCareProvider] = (
     (__ \ "ccpURN").read(minLength[String](1)) ~
       (__ \ "ccpPostcode").read[String]

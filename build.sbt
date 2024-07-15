@@ -23,7 +23,7 @@ lazy val microservice = Project("tax-free-childcare-payments-nsi-stub", file("."
     resolvers += Resolver.jcenterRepo,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     playDefaultPort := 10501,
-    routesImport ++= Seq("models.request.CheckBalanceRequest")
+    routesImport ++= Seq("models.request._")
   )
   .settings(CodeCoverageSettings.settings *)
 

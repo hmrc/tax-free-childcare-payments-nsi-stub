@@ -25,9 +25,8 @@ final case class MakePaymentResponse(
 
 object MakePaymentResponse {
   import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-  import play.api.libs.json.{OWrites, __}
+  import play.api.libs.json.{__, OWrites}
 
-  /** This should match the API spec in <https://docs.google.com/document/d/1N3wV9LaPhvk5bKvJQliTegtu7o_kBwFq>. */
   implicit val writes: OWrites[MakePaymentResponse] = (
     (__ \ "paymentReference").write[String] ~
       (__ \ "paymentDate").write[LocalDate]

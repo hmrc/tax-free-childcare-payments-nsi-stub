@@ -89,9 +89,9 @@ class NsiControllerISpec
         withClient { ws =>
           forAll(LinkAccountsScenario.random) { scenario =>
             val response = ws
-              .url(s"$baseUrl$link_url/${scenario.account_ref}")
+              .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-              .post(scenario.requestBody)
+              .get()
               .futureValue
 
             response.status shouldBe CREATED
@@ -107,9 +107,9 @@ class NsiControllerISpec
         s"given child payment ref $accountRef" in withClient { ws =>
           forAll(LinkAccountsScenario withFixedAccountRef accountRef) { scenario =>
             val response = ws
-              .url(s"$baseUrl$link_url/${scenario.account_ref}")
+              .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-              .post(scenario.requestBody)
+              .get()
               .futureValue
 
             val actualErrorCode = (response.json \ "errorCode").as[String]
