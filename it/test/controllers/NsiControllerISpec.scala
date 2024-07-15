@@ -120,6 +120,23 @@ class NsiControllerISpec
         }
       }
     }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in withClient { ws =>
+        forAll(LinkAccountsScenario withFixedAccountRef "aaaa") { scenario =>
+          val response = ws
+            .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
+            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+            .get()
+            .futureValue
+
+          val actualErrorCode = (response.json \ "errorCode").as[String]
+
+          response.status shouldBe BAD_REQUEST
+          actualErrorCode shouldBe "E0000"
+        }
+      }
+    }
   }
 
   val balance_url = "/account/v1/accounts/balance"
@@ -160,6 +177,23 @@ class NsiControllerISpec
         }
       }
     }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in withClient { ws =>
+        forAll(CheckBalanceScenario withFixedAccountRef "aaaa") { scenario =>
+          val response = ws
+            .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
+            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+            .get()
+            .futureValue
+
+          val actualErrorCode = (response.json \ "errorCode").as[String]
+
+          response.status shouldBe BAD_REQUEST
+          actualErrorCode shouldBe "E0000"
+        }
+      }
+    }
   }
 
   val payment_url = "/payment/v1/payments/pay-childcare"
@@ -196,6 +230,23 @@ class NsiControllerISpec
             response.status shouldBe expectedStatusCode
             actualErrorCode shouldBe expectedErrorCode
           }
+        }
+      }
+    }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in withClient { ws =>
+        forAll(MakePaymentScenario withFixedAccountRef "aaaa") { scenario =>
+          val response = ws
+            .url(s"$baseUrl$payment_url")
+            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+            .post(scenario.requestBody)
+            .futureValue
+
+          val actualErrorCode = (response.json \ "errorCode").as[String]
+
+          response.status shouldBe BAD_REQUEST
+          actualErrorCode shouldBe "E0000"
         }
       }
     }
