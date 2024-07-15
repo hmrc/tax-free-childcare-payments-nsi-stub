@@ -120,12 +120,29 @@ class NsiControllerISpec
         }
       }
     }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in withClient { ws =>
+        forAll(LinkAccountsScenario withFixedAccountRef "aaaa") { scenario =>
+          val response = ws
+            .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
+            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+            .get()
+            .futureValue
+
+          val actualErrorCode = (response.json \ "errorCode").as[String]
+
+          response.status shouldBe BAD_REQUEST
+          actualErrorCode shouldBe "E0000"
+        }
+      }
+    }
   }
 
   val balance_url = "/account/v1/accounts/balance"
   s"GET $balance_url" should {
     s"respond $OK and echo the correlation ID in the response header" when {
-      "request contains valid correlation ID header" in withClient { ws =>
+      "request contains valid correlation ID header and account ref starts with AAAA, AABB, AACC, or AADD" in withClient { ws =>
         forAll(CheckBalanceScenario.random) { scenario =>
           val response = ws
             .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
@@ -157,6 +174,23 @@ class NsiControllerISpec
             response.status shouldBe expectedStatusCode
             actualErrorCode shouldBe expectedErrorCode
           }
+        }
+      }
+    }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in withClient { ws =>
+        forAll(CheckBalanceScenario withFixedAccountRef "aaaa") { scenario =>
+          val response = ws
+            .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
+            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+            .get()
+            .futureValue
+
+          val actualErrorCode = (response.json \ "errorCode").as[String]
+
+          response.status shouldBe BAD_REQUEST
+          actualErrorCode shouldBe "E0000"
         }
       }
     }
@@ -196,6 +230,23 @@ class NsiControllerISpec
             response.status shouldBe expectedStatusCode
             actualErrorCode shouldBe expectedErrorCode
           }
+        }
+      }
+    }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in withClient { ws =>
+        forAll(MakePaymentScenario withFixedAccountRef "aaaa") { scenario =>
+          val response = ws
+            .url(s"$baseUrl$payment_url")
+            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+            .post(scenario.requestBody)
+            .futureValue
+
+          val actualErrorCode = (response.json \ "errorCode").as[String]
+
+          response.status shouldBe BAD_REQUEST
+          actualErrorCode shouldBe "E0000"
         }
       }
     }

@@ -39,9 +39,9 @@ object CheckBalanceScenario extends Generators {
   import CheckBalanceResponse.AccountStatus
   import org.scalacheck.Gen
   import play.api.libs.functional.syntax.toFunctionalBuilderOps
-  import play.api.libs.json.{__, Reads}
+  import play.api.libs.json.{Reads, __}
 
-  val random: Gen[CheckBalanceScenario] = nonEmptyAlphaNumStrings flatMap withFixedAccountRef
+  val random: Gen[CheckBalanceScenario] = accountRefsForHappyPath flatMap withFixedAccountRef
 
   def withFixedAccountRef(accountRef: String): Gen[CheckBalanceScenario] =
     for {
