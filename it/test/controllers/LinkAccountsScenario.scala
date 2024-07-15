@@ -30,7 +30,7 @@ final case class LinkAccountsScenario(
     epp_urn: String,
     epp_account: String,
     parent_nino: String,
-    child_dob: LocalDate
+    child_dob: String
   ) {
 
   val queryString: String = LinkAccountsRequest.binder.unbind("", requestData)
@@ -53,7 +53,7 @@ object LinkAccountsScenario extends Generators {
       epp_account    <- nonEmptyAlphaNumStrings
       nino           <- ninos
       child_age_days <- Gen.chooseNum(0, 18 * 365)
-    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, LocalDate.now() minusDays child_age_days)
+    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, (LocalDate.now() minusDays child_age_days).toString)
 
   val expectedResponseFormat: Reads[LinkAccountsResponse] = (__ \ "childFullName").read[String] map LinkAccountsResponse.apply
 }
