@@ -16,25 +16,37 @@
 
 package models.request
 
-import java.time.LocalDate
-
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{Reads, __}
+import play.api.mvc.QueryStringBindable
 
 final case class LinkAccountsRequest(
     epp_urn: String,
     epp_account: String,
     parent_nino: String,
-    child_dob: LocalDate
+    child_dob: String
   )
 
 object LinkAccountsRequest {
+  private val epp_urn_key     = "eppURN"
+  private val epp_account_key = "eppAccount"
+  private val parent_nino_key = "parentNino"
+  private val child_dob_key   = "childDoB"
 
-  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
-  implicit val reads: Reads[LinkAccountsRequest] = (
-    (__ \ "eppURN").read[String] ~
-      (__ \ "eppAccount").read[String] ~
-      (__ \ "parentNino").read[String] ~
-      (__ \ "childDoB").read[LocalDate]
-  )(apply _)
+  implicit val binder: QueryStringBindable[LinkAccountsRequest] = new QueryStringBindable[LinkAccountsRequest] {
+
+    def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LinkAccountsRequest]] = for {
+      epp_urn     <- params get epp_urn_key flatMap (_.headOption)
+      epp_account <- params get epp_account_key flatMap (_.headOption)
+      parent_nino <- params get parent_nino_key flatMap (_.headOption)
+      child_dob   <- params get child_dob_key flatMap (_.headOption)
+    } yield Right(apply(epp_urn, epp_account, parent_nino, child_dob))
+
+    def unbind(key: String, value: LinkAccountsRequest): String = Map(
+      epp_urn_key     -> value.epp_urn,
+      epp_account_key -> value.epp_account,
+      parent_nino_key -> value.parent_nino,
+      child_dob_key   -> value.child_dob
+    )
+      .map { case (k, v) => s"$k=$v" }
+      .mkString("&")
+  }
 }

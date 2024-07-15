@@ -23,7 +23,7 @@ import scala.util.Random
 
 import models.ErrorResponse
 import models.ErrorResponse.Code._
-import models.request.{CheckBalanceRequest, MakePaymentRequest}
+import models.request._
 import models.response.CheckBalanceResponse.AccountStatus
 import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 
@@ -39,7 +39,7 @@ class NsiController @Inject() (
   ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(accountRef: String): Action[JsValue] = correlate(parse.json) { _ =>
+  def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate { _ =>
     withNsiErrorScenarios(accountRef) {
       Created(
         Json.toJson(
@@ -80,7 +80,7 @@ class NsiController @Inject() (
     }
   }
 
-  private def withNsiErrorScenarios(accountRef: String)(block: => Result) =
+  private def withNsiErrorScenarios(accountRef: String)(block: => Result) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
         new Status(nsiErrorCode.statusCode)(
@@ -90,6 +90,7 @@ class NsiController @Inject() (
         )
       case None               => block
     }
+  }
 
   private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
     withJsonBody(f andThen Future.successful)

@@ -17,8 +17,9 @@
 package controllers
 
 import base.Generators
+import models.request.LinkAccountsRequest
 import models.response.LinkAccountsResponse
-import play.api.libs.json.{JsObject, Json, Reads, __}
+import play.api.libs.json.{Reads, __}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -29,16 +30,11 @@ final case class LinkAccountsScenario(
     epp_urn: String,
     epp_account: String,
     parent_nino: String,
-    child_dob: LocalDate
+    child_dob: String
   ) {
 
-  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
-  val requestBody: JsObject = Json.obj(
-    "eppURN"     -> epp_urn,
-    "eppAccount" -> epp_account,
-    "parentNino" -> parent_nino,
-    "childDoB"   -> child_dob
-  )
+  val queryString: String = LinkAccountsRequest.binder.unbind("", requestData)
+  lazy private val requestData = LinkAccountsRequest(epp_urn, epp_account, parent_nino, child_dob)
 }
 
 object LinkAccountsScenario extends Generators {
@@ -57,8 +53,7 @@ object LinkAccountsScenario extends Generators {
       epp_account    <- nonEmptyAlphaNumStrings
       nino           <- ninos
       child_age_days <- Gen.chooseNum(0, 18 * 365)
-    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, LocalDate.now() minusDays child_age_days)
+    } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, (LocalDate.now() minusDays child_age_days).toString)
 
-  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
   val expectedResponseFormat: Reads[LinkAccountsResponse] = (__ \ "childFullName").read[String] map LinkAccountsResponse.apply
 }

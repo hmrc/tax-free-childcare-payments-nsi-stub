@@ -22,7 +22,7 @@ trait Generators {
   import org.scalacheck.Gen
 
   protected val nonEmptyAlphaNumStrings: Gen[String] = for {
-    n <- Gen.chooseNum(1, MAX_ID_LEN)
+    n     <- Gen.chooseNum(1, MAX_ID_LEN)
     chars <- Gen.containerOfN[Array, Char](n, Gen.alphaNumChar)
   } yield chars.mkString
 
@@ -34,15 +34,15 @@ trait Generators {
   } yield char0 +: char1 +: chars.mkString :+ char8
 
   lazy protected val postcodes: Gen[String] = for {
-    n <- Gen.chooseNum(1,2)
+    n        <- Gen.chooseNum(1, 2)
     letters1 <- Gen.listOfN(n, Gen.alphaUpperChar)
-    num1 <- Gen.chooseNum(1, 99)
-    num2 <- Gen.chooseNum(1,9)
+    num1     <- Gen.chooseNum(1, 99)
+    num2     <- Gen.chooseNum(1, 9)
     letters2 <- Gen.listOfN(2, Gen.alphaUpperChar)
   } yield s"$letters1$num1 $num2$letters2"
 
   lazy protected val childCareProviders: Gen[ChildCareProvider] = for {
-    urn <- nonEmptyAlphaNumStrings
+    urn      <- nonEmptyAlphaNumStrings
     postcode <- postcodes
   } yield ChildCareProvider(urn, postcode)
 
