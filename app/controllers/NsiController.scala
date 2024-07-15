@@ -40,19 +40,15 @@ class NsiController @Inject() (
   import NsiController._
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate { _ =>
-    withNsiErrorScenarios(accountRef) {
+    withNsiErrorScenarios(accountRef) { childName =>
       Created(
-        Json.toJson(
-          LinkAccountsResponse(
-            testChildren(accountRef take 4)
-          )
-        )
+        Json.toJson(LinkAccountsResponse(childName))
       )
     }
   }
 
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef) {
+    withNsiErrorScenarios(accountRef) { _ =>
       Ok(
         Json.toJson(
           CheckBalanceResponse(
@@ -70,7 +66,7 @@ class NsiController @Inject() (
 
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
     withJsonBody { body: MakePaymentRequest =>
-      withNsiErrorScenarios(body.tfc_account_ref) {
+      withNsiErrorScenarios(body.tfc_account_ref) { _ =>
         Created(
           Json.toJson(
             MakePaymentResponse(randomPaymentRef, randomDate)
@@ -80,7 +76,7 @@ class NsiController @Inject() (
     }
   }
 
-  private def withNsiErrorScenarios(accountRef: String)(block: => Result) = {
+  private def withNsiErrorScenarios(accountRef: String)(block: String => Result) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
         new Status(nsiErrorCode.statusCode)(
@@ -88,7 +84,13 @@ class NsiController @Inject() (
             ErrorResponse(nsiErrorCode, "asdf")
           )
         )
-      case None               => block
+      case None               =>
+        testChildren get (accountRef take 4) match {
+          case Some(childName) => block(childName)
+          case None            => BadRequest(
+              Json.toJson(ErrorResponse(E0000, s"Unsupported test scenario: $accountRef"))
+            )
+        }
     }
   }
 

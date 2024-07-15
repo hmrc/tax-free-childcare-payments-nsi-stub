@@ -21,6 +21,11 @@ import models.request.ChildCareProvider
 trait Generators {
   import org.scalacheck.Gen
 
+  val accountRefsForHappyPath: Gen[String] = for {
+    accountRefInit <- Gen oneOf Array("AAAA", "AABB", "AACC", "AADD")
+    accountRefTail <- nonEmptyAlphaNumStrings
+  } yield accountRefInit + accountRefTail
+
   protected val nonEmptyAlphaNumStrings: Gen[String] = for {
     n     <- Gen.chooseNum(1, MAX_ID_LEN)
     chars <- Gen.containerOfN[Array, Char](n, Gen.alphaNumChar)

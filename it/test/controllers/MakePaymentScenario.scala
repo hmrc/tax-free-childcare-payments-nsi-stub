@@ -52,7 +52,7 @@ object MakePaymentScenario extends Generators {
 
   import java.time.LocalDate
 
-  val random: Gen[MakePaymentScenario] = nonEmptyAlphaNumStrings flatMap withFixedAccountRef
+  val random: Gen[MakePaymentScenario] = accountRefsForHappyPath flatMap withFixedAccountRef
 
   def withFixedAccountRef(account_ref: String): Gen[MakePaymentScenario] =
     for {

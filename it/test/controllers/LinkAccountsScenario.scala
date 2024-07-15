@@ -40,11 +40,7 @@ final case class LinkAccountsScenario(
 object LinkAccountsScenario extends Generators {
   import org.scalacheck.Gen
 
-  val random: Gen[LinkAccountsScenario] = for {
-    accountRefInit <- Gen oneOf Array("AAAA","AABB","AACC","AADD")
-    accountRefTail <- nonEmptyAlphaNumStrings
-    scenario <- withFixedAccountRef(accountRefInit + accountRefTail)
-  } yield scenario
+  val random: Gen[LinkAccountsScenario] = accountRefsForHappyPath flatMap withFixedAccountRef
 
   def withFixedAccountRef(account_ref: String): Gen[LinkAccountsScenario] =
     for {

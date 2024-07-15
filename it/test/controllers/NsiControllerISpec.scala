@@ -125,7 +125,7 @@ class NsiControllerISpec
   val balance_url = "/account/v1/accounts/balance"
   s"GET $balance_url" should {
     s"respond $OK and echo the correlation ID in the response header" when {
-      "request contains valid correlation ID header" in withClient { ws =>
+      "request contains valid correlation ID header and account ref starts with AAAA, AABB, AACC, or AADD" in withClient { ws =>
         forAll(CheckBalanceScenario.random) { scenario =>
           val response = ws
             .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
