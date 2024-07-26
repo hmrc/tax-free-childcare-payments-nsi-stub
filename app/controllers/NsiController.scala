@@ -16,21 +16,19 @@
 
 package controllers
 
-import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
-import scala.util.Random
-
 import models.ErrorResponse
 import models.ErrorResponse.Code._
 import models.request._
 import models.response.CheckBalanceResponse.AccountStatus
 import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
-
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 
 @Singleton
 class NsiController @Inject() (
@@ -52,12 +50,12 @@ class NsiController @Inject() (
       Ok(
         Json.toJson(
           CheckBalanceResponse(
-            AccountStatus.values.toArray.apply(Random.nextInt(AccountStatus.values.knownSize)),
-            randomSumOfMoney,
-            randomSumOfMoney,
-            randomSumOfMoney,
-            randomSumOfMoney,
-            randomSumOfMoney
+            AccountStatus.ACTIVE,
+            14159,
+            26535,
+            89793,
+            23846,
+            26433
           )
         )
       )
@@ -69,7 +67,7 @@ class NsiController @Inject() (
       withNsiErrorScenarios(body.tfc_account_ref) { _ =>
         Created(
           Json.toJson(
-            MakePaymentResponse(randomPaymentRef, randomDate)
+            MakePaymentResponse("8327950288419716", PAYMENT_DATE)
           )
         )
       }
@@ -99,15 +97,7 @@ class NsiController @Inject() (
 }
 
 object NsiController {
-  private def randomSumOfMoney = Random.nextInt(MAX_SUM_OF_MONEY_PENCE)
-  private def randomDate       = LocalDate.now() plusDays randomPaymentDelayDays
-  private def randomPaymentRef = Array.fill(PAYMENT_REF_LENGTH)(randomDigit).mkString
-
-  @inline private def randomPaymentDelayDays = Random.nextInt(30)
-  @inline private def randomDigit            = Random.nextInt(10)
-
-  private val MAX_SUM_OF_MONEY_PENCE = 100000
-  private val PAYMENT_REF_LENGTH     = 16
+  private val PAYMENT_DATE = LocalDate parse "2024-10-01"
 
   private val testChildren = Map(
     "AAAA" -> "Peter Pan",
