@@ -24,6 +24,7 @@ import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentR
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads}
 import play.api.mvc._
+import services.AccountService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.LocalDate
@@ -33,7 +34,8 @@ import scala.concurrent.Future
 @Singleton
 class NsiController @Inject() (
     cc: ControllerComponents,
-    correlate: CorrelationIdAction
+    correlate: CorrelationIdAction,
+    accountService: AccountService
   ) extends BackendController(cc) with Logging {
   import NsiController._
 
