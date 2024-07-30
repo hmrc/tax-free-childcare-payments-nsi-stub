@@ -19,15 +19,12 @@ package controllers
 import models.ErrorResponse
 import models.ErrorResponse.Code._
 import models.request._
-import models.response.CheckBalanceResponse.AccountStatus
-import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc._
 import services.AccountService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
@@ -39,44 +36,21 @@ class NsiController @Inject() (
   ) extends BackendController(cc) with Logging {
   import NsiController._
 
-  def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate { _ =>
-    withNsiErrorScenarios(accountRef) { childName =>
-      Created(
-        Json.toJson(LinkAccountsResponse(childName))
-      )
-    }
+  def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
+    withNsiErrorScenarios(accountRef, accountService.getLinkAccountResponse, json => Created(json: JsValue))
   }
 
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef) { _ =>
-      Ok(
-        Json.toJson(
-          CheckBalanceResponse(
-            AccountStatus.ACTIVE,
-            14159,
-            26535,
-            89793,
-            23846,
-            26433
-          )
-        )
-      )
-    }
+    withNsiErrorScenarios(accountRef, accountService.getAccountBalanceResponse, json => Ok(json: JsValue))
   }
 
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
     withJsonBody { body: MakePaymentRequest =>
-      withNsiErrorScenarios(body.tfc_account_ref) { _ =>
-        Created(
-          Json.toJson(
-            MakePaymentResponse("8327950288419716", PAYMENT_DATE)
-          )
-        )
-      }
+      withNsiErrorScenarios(body.tfc_account_ref, accountService.getPaymentResponse, json => Created(json: JsValue))
     }
   }
 
-  private def withNsiErrorScenarios(accountRef: String)(block: String => Result) = {
+  private def withNsiErrorScenarios[A: Writes](accountRef: String, block: String => Option[A], toResult: JsValue => Result) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
         new Status(nsiErrorCode.statusCode)(
@@ -85,9 +59,9 @@ class NsiController @Inject() (
           )
         )
       case None               =>
-        testChildren get (accountRef take 4) match {
-          case Some(childName) => block(childName)
-          case None            => BadRequest(
+        block(accountRef) match {
+          case Some(model) => toResult(Json.toJson(model))
+          case None        => BadRequest(
               Json.toJson(ErrorResponse(E0000, s"Unsupported test scenario: $accountRef"))
             )
         }
@@ -99,14 +73,6 @@ class NsiController @Inject() (
 }
 
 object NsiController {
-  private val PAYMENT_DATE = LocalDate parse "2024-10-01"
-
-  private val testChildren = Map(
-    "AAAA" -> "Peter Pan",
-    "AABB" -> "Benjamin Button",
-    "AACC" -> "Christopher Columbus",
-    "AADD" -> "Donald Duck"
-  )
 
   private val testErrorScenarios = Map(
     "EEAA" -> E0000,
