@@ -105,6 +105,7 @@ object NsiController {
     "EEBE" -> E9000,
     "EEBF" -> E9999,
     "EEBG" -> E8000,
-    "EEBH" -> E8001
+    "EEBH" -> E8001,
+    "EEBI" -> UNKNOWN
   )
 }
