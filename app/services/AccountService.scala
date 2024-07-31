@@ -49,7 +49,7 @@ class AccountService @Inject() {
     "AABB" -> Account(
       LinkAccountsResponse("Benjamin Button"),
       CheckBalanceResponse(
-        AccountStatus.INACTIVE,
+        AccountStatus.BLOCKED,
         14159,
         26535,
         89793,
