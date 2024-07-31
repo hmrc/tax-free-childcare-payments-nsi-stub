@@ -34,12 +34,11 @@ object CheckBalanceResponse {
   import play.api.libs.json.{__, Json, OWrites}
 
   object AccountStatus extends Enumeration {
-    val ACTIVE, BLOCKED = Value
+    val ACTIVE, BLOCKED, UNKNOWN = Value
 
     implicit val format: Format[AccountStatus.Value] = Json.formatEnum(this)
   }
 
-  /** This should match the API spec in <https://docs.google.com/document/d/10ULaEScNhaAZqFf1hEzxseJB2u_a2GgS>. */
   implicit val writes: OWrites[CheckBalanceResponse] = (
     (__ \ "accountStatus").write[AccountStatus.Value] ~
       (__ \ "topUpAvailable").write[Int] ~
