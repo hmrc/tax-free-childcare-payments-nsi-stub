@@ -17,7 +17,6 @@
 package models
 
 import models.ErrorResponse.Code
-
 import play.api.libs.json.{Json, Writes}
 
 final case class ErrorResponse(
@@ -66,6 +65,8 @@ object ErrorResponse {
 
     val E8000: CodeVal = CodeVal(503)
     val E8001: CodeVal = CodeVal(503)
+
+    val UNKNOWN: CodeVal = CodeVal(400)
 
     implicit val writes: Writes[Code.Value] = Json.formatEnum(Code)
   }
