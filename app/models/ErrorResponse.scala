@@ -37,8 +37,8 @@ object ErrorResponse {
 
     val E0002: CodeVal        = CodeVal(400, "E0002", "eppURN is missing")
     val E0003: CodeVal        = CodeVal(400, "E0003", "ccpURN is missing")
+    val E0004: CodeVal        = CodeVal(400, "E0004", "eppAccount is missing")
 
-    val E0004: CodeVal        = CodeVal(500, "E0004", "--missing-error-description--")
     val E0005: CodeVal        = CodeVal(500, "E0005", "--missing-error-description--")
     val E0006: CodeVal        = CodeVal(500, "E0006", "--missing-error-description--")
     val E0007: CodeVal        = CodeVal(500, "E0007", "--missing-error-description--")
