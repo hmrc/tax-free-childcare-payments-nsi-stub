@@ -53,10 +53,8 @@ class NsiController @Inject() (
   private def withNsiErrorScenarios[A: Writes](accountRef: String, block: String => Option[A], toResult: JsValue => Result) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
-        new Status(nsiErrorCode.errorCode)(
-          Json.toJson(
-            ErrorResponse(nsiErrorCode, "asdf")
-          )
+        new Status(nsiErrorCode.status)(
+          Json.toJson(nsiErrorCode)
         )
       case None               =>
         block(accountRef) match {
