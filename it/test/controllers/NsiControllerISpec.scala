@@ -44,8 +44,10 @@ class NsiControllerISpec
 
   private val errorScenarios = Table(
     ("Expected Error Code", "Expected Status Code", "Outbound Child Payment Ref"),
-    ("E0000", 500, "EEAA00000TFC"),
-    ("E0001", 500, "EEBB00000TFC"),
+    ("E0000", 400, "EEAA00000TFC"),
+    ("E0001", 404, "EEBL00000TFC"),
+    ("E0001", 404, "EEBB00000TFC"),
+    ("E0001", 400, "EEBP00000TFC"),
     ("E0002", 500, "EECC00000TFC"),
     ("E0003", 500, "EEDD00000TFC"),
     ("E0004", 500, "EEEE00000TFC"),

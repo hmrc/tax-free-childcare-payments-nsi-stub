@@ -53,7 +53,7 @@ class NsiController @Inject() (
   private def withNsiErrorScenarios[A: Writes](accountRef: String, block: String => Option[A], toResult: JsValue => Result) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
-        new Status(nsiErrorCode.statusCode)(
+        new Status(nsiErrorCode.errorCode)(
           Json.toJson(
             ErrorResponse(nsiErrorCode, "asdf")
           )
@@ -76,7 +76,9 @@ object NsiController {
 
   private val testErrorScenarios = Map(
     "EEAA" -> E0000,
-    "EEBB" -> E0001,
+    "EEBL" -> E0001Link,
+    "EEBB" -> E0001Balance,
+    "EEBP" -> E0001Payment,
     "EECC" -> E0002,
     "EEDD" -> E0003,
     "EEEE" -> E0004,
