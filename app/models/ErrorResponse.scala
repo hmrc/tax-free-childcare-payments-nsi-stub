@@ -30,11 +30,14 @@ object ErrorResponse {
     case class CodeVal(status: Int, errorCode: String, errorDescription: String) extends super.Val
 
     val E0000: CodeVal        = CodeVal(400, "E0000", "Invalid Input Data")
+
     val E0001Link: CodeVal    = CodeVal(404, "E0001", "childAccountPaymentRef is missing")
     val E0001Balance: CodeVal = CodeVal(404, "E0001", "childAccountPaymentRef is missing")
     val E0001Payment: CodeVal = CodeVal(400, "E0001", "childAccountPaymentRef is missing")
-    val E0002: CodeVal        = CodeVal(500, "E0002", "--missing-error-description--")
-    val E0003: CodeVal        = CodeVal(500, "E0003", "--missing-error-description--")
+
+    val E0002: CodeVal        = CodeVal(400, "E0002", "eppURN is missing")
+    val E0003: CodeVal        = CodeVal(400, "E0003", "ccpURN is missing")
+
     val E0004: CodeVal        = CodeVal(500, "E0004", "--missing-error-description--")
     val E0005: CodeVal        = CodeVal(500, "E0005", "--missing-error-description--")
     val E0006: CodeVal        = CodeVal(500, "E0006", "--missing-error-description--")
