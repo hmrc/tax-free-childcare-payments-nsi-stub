@@ -84,7 +84,7 @@ class NsiControllerISpec
     ("E8001", 503, "EEBH00000TFC")
   )
 
-  val link_url = "/account/v1/accounts/link-to-EPP"
+  val link_url = "/account/v1/accounts/link-to-epp"
   s"POST $link_url/:ref" should {
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains a valid correlation ID header and expected JSON fields are present and account ref starts with AAAA, AABB, AACC, or AADD" in
