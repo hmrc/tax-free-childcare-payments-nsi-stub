@@ -16,8 +16,6 @@
 
 package controllers
 
-import models.ErrorResponse
-import models.ErrorResponse.Code._
 import models.request._
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
@@ -60,7 +58,10 @@ class NsiController @Inject() (
         block(accountRef) match {
           case Some(model) => toResult(Json.toJson(model))
           case None        => BadRequest(
-              Json.toJson(ErrorResponse(E0000, s"Unsupported test scenario: $accountRef"))
+              Json.obj(
+                "errorCode"        -> "E0000",
+                "errorDescription" -> s"Unsupported test scenario: $accountRef"
+              )
             )
         }
     }
@@ -71,6 +72,7 @@ class NsiController @Inject() (
 }
 
 object NsiController {
+  import models.ErrorResponse._
 
   private val testErrorScenarios = Map(
     "EEAA" -> E0000,
