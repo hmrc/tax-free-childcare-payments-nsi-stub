@@ -68,7 +68,7 @@ class NsiControllerISpec
     ("EESS00000TFC",               UNAUTHORIZED,           "E0401",               "Authentication information is missing or invalid"),
     ("EETT00000TFC",               FORBIDDEN,              "E0030",               "EPP is not Active"),
     ("EEUU00000TFC",               FORBIDDEN,              "E0031",               "CCP is not Active"),
-    ("EEVV00000TFC",               FORBIDDEN,              "E0032",               "TBD"),
+    ("EEVV00000TFC",               FORBIDDEN,              "E0032",               "EPP is not linked to Child Account"),
     ("EEWW00000TFC",               FORBIDDEN,              "E0033",               "Insufficient funds"),
     ("EEXX00000TFC",               FORBIDDEN,              "E0034",               "Error returned from banking services"),
     ("EEYY00000TFC",               FORBIDDEN,              "E0035",               "Payments from this TFC account are blocked"),
