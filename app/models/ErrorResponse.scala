@@ -50,7 +50,7 @@ object ErrorResponse extends Enumeration {
 
   val E0030: CodeVal = CodeVal(403, "E0030", "EPP is not Active")
   val E0031: CodeVal = CodeVal(403, "E0031", "CCP is not Active")
-  val E0032: CodeVal = CodeVal(403, "E0032", "TBD")
+  val E0032: CodeVal = CodeVal(403, "E0032", "EPP is not linked to Child Account")
   val E0033: CodeVal = CodeVal(403, "E0033", "Insufficient funds")
   val E0034: CodeVal = CodeVal(403, "E0034", "Error returned from banking services")
   val E0035: CodeVal = CodeVal(403, "E0035", "Payments from this TFC account are blocked")
