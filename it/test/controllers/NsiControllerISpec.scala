@@ -24,6 +24,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status
+import play.api.libs.json.{JsDefined, JsString}
 import play.api.test.WsTestClient
 
 class NsiControllerISpec
@@ -38,51 +39,51 @@ class NsiControllerISpec
     with JsonGenerators
     with ScalaCheckPropertyChecks {
   private val contextRoot = "/tax-free-childcare-payments-nsi-stub"
-  private val baseUrl     = s"http://localhost:$port$contextRoot"
+  private val baseUrl = s"http://localhost:$port$contextRoot"
 
   private val CORRELATION_ID = "correlationId"
 
   private val errorScenarios = Table(
-    ("Expected Error Code", "Expected Status Code", "Outbound Child Payment Ref"),
-    ("E0000", 500, "EEAA00000TFC"),
-    ("E0001", 500, "EEBB00000TFC"),
-    ("E0002", 500, "EECC00000TFC"),
-    ("E0003", 500, "EEDD00000TFC"),
-    ("E0004", 500, "EEEE00000TFC"),
-    ("E0005", 500, "EEFF00000TFC"),
-    ("E0006", 500, "EEGG00000TFC"),
-    ("E0007", 500, "EEHH00000TFC"),
-    ("E0008", 500, "EEII00000TFC"),
-
-    ("E0020", 502, "EELL00000TFC"),
-    ("E0021", 500, "EEMM00000TFC"),
-    ("E0022", 500, "EENN00000TFC"),
-    ("E0023", 500, "EEOO00000TFC"),
-    ("E0024", 400, "EEPP00000TFC"),
-    ("E0025", 400, "EEQQ00000TFC"),
-    ("E0026", 400, "EERR00000TFC"),
-
-    ("E0401", 500, "EESS00000TFC"),
-
-    ("E0030", 400, "EETT00000TFC"),
-    ("E0031", 400, "EEUU00000TFC"),
-    ("E0032", 400, "EEVV00000TFC"),
-    ("E0033", 400, "EEWW00000TFC"),
-    ("E0034", 503, "EEXX00000TFC"),
-    ("E0035", 400, "EEYY00000TFC"),
-
-    ("E0040", 400, "EEZZ00000TFC"),
-    ("E0041", 400, "EEBA00000TFC"),
-    ("E0042", 400, "EEBC00000TFC"),
-    ("E0043", 400, "EEBD00000TFC"),
-
-    ("E9000", 503, "EEBE00000TFC"),
-    ("E9999", 503, "EEBF00000TFC"),
-    ("E8000", 503, "EEBG00000TFC"),
-    ("E8001", 503, "EEBH00000TFC")
+    ("Outbound Child Payment Ref", "Expected Status Code", "Expected Error Code", "Expected Error Description"),
+    ("EEAA00000TFC",               BAD_REQUEST,            "E0000",               "Invalid input data"),
+    ("EEBL00000TFC",               NOT_FOUND,              "E0001",               "childAccountPaymentRef is missing"),
+    ("EEBB00000TFC",               NOT_FOUND,              "E0001",               "childAccountPaymentRef is missing"),
+    ("EEBP00000TFC",               BAD_REQUEST,            "E0001",               "childAccountPaymentRef is missing"),
+    ("EECC00000TFC",               BAD_REQUEST,            "E0002",               "eppURN is missing"),
+    ("EEDD00000TFC",               BAD_REQUEST,            "E0003",               "ccpURN is missing"),
+    ("EEEE00000TFC",               BAD_REQUEST,            "E0004",               "eppAccount is missing"),
+    ("EEFF00000TFC",               BAD_REQUEST,            "E0005",               "parentNino is missing"),
+    ("EEGG00000TFC",               BAD_REQUEST,            "E0006",               "childDob is missing"),
+    ("EEHH00000TFC",               BAD_REQUEST,            "E0007",               "payeeType is missing"),
+    ("EEII00000TFC",               BAD_REQUEST,            "E0008",               "amount is missing"),
+    ("EEIJ00000TFC",               BAD_REQUEST,            "E0009",               "ccpPostcode is missing"),
+    ("EELL00000TFC",               BAD_REQUEST,            "E0020",               "parentNino does not match expected format (AANNNNNNA)"),
+    ("EEMM00000TFC",               BAD_REQUEST,            "E0021",               "childDob does not match expected format (YYYY-MM-DD)"),
+    ("EENN00000TFC",               BAD_REQUEST,            "E0022",               "payeeType value should be one of ['CCP','EPP']"),
+    ("EEOO00000TFC",               BAD_REQUEST,            "E0023",               "amount most be a number"),
+    ("EEPP00000TFC",               BAD_REQUEST,            "E0024",               "eppAccount does not correlate with the provided eppURN"),
+    ("EEQQ00000TFC",               BAD_REQUEST,            "E0025",               "childDob does not correlate with the provided childAccountPaymentRef"),
+    ("EERR00000TFC",               BAD_REQUEST,            "E0026",               "childAccountPaymentRef is not related to parentNino"),
+    ("EERS00000TFC",               BAD_REQUEST,            "E0027",               "CCP not linked to Child Account"),
+    ("EESS00000TFC",               UNAUTHORIZED,           "E0401",               "Authentication information is missing or invalid"),
+    ("EETT00000TFC",               FORBIDDEN,              "E0030",               "EPP is not Active"),
+    ("EEUU00000TFC",               FORBIDDEN,              "E0031",               "CCP is not Active"),
+    ("EEVV00000TFC",               FORBIDDEN,              "E0032",               "TBD"),
+    ("EEWW00000TFC",               FORBIDDEN,              "E0033",               "Insufficient funds"),
+    ("EEXX00000TFC",               FORBIDDEN,              "E0034",               "Error returned from banking services"),
+    ("EEYY00000TFC",               FORBIDDEN,              "E0035",               "Payments from this TFC account are blocked"),
+    ("EEYZ00000TFC",               FORBIDDEN,              "E0036",               "Check Payee Bank Details"),
+    ("EEZZ00000TFC",               NOT_FOUND,              "E0040",               "childAccountPaymentRef not found"),
+    ("EEBA00000TFC",               NOT_FOUND,              "E0041",               "eppURN not found"),
+    ("EEBC00000TFC",               NOT_FOUND,              "E0042",               "ccpURN not found"),
+    ("EEBD00000TFC",               NOT_FOUND,              "E0043",               "parentNino not found"),
+    ("EEBE00000TFC",               INTERNAL_SERVER_ERROR,  "E9000",               "Internal server error"),
+    ("EEBF00000TFC",               INTERNAL_SERVER_ERROR,  "E9999",               "Error during execution"),
+    ("EEBG00000TFC",               SERVICE_UNAVAILABLE,    "E8000",               "Service not available"),
+    ("EEBH00000TFC",               SERVICE_UNAVAILABLE,    "E8001",               "Service not available due to lack of connection to provider")
   )
 
-  val link_url = "/account/v1/accounts/link-to-EPP"
+  val link_url = "/account/v1/accounts/link-to-epp"
   s"POST $link_url/:ref" should {
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains a valid correlation ID header and expected JSON fields are present and account ref starts with AAAA, AABB, AACC, or AADD" in
@@ -102,7 +103,7 @@ class NsiControllerISpec
         }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
+    forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
       s"respond with status code $expectedStatusCode" when {
         s"given child payment ref $accountRef" in withClient { ws =>
           forAll(LinkAccountsScenario withFixedAccountRef accountRef) { scenario =>
@@ -112,10 +113,9 @@ class NsiControllerISpec
               .get()
               .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
-
-            response.status shouldBe expectedStatusCode
-            actualErrorCode shouldBe expectedErrorCode
+            response.status                      shouldBe expectedStatusCode
+            (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
+            (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
           }
         }
       }
@@ -158,7 +158,7 @@ class NsiControllerISpec
       }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
+    forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
       s"respond with status code $expectedStatusCode" when {
         s"given child payment ref $accountRef" in withClient { ws =>
           forAll(CheckBalanceScenario withFixedAccountRef accountRef) { scenario =>
@@ -169,10 +169,9 @@ class NsiControllerISpec
                 .get()
                 .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
-
-            response.status shouldBe expectedStatusCode
-            actualErrorCode shouldBe expectedErrorCode
+            response.status                      shouldBe expectedStatusCode
+            (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
+            (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
           }
         }
       }
@@ -215,7 +214,7 @@ class NsiControllerISpec
       }
     }
 
-    forAll(errorScenarios) { (expectedErrorCode, expectedStatusCode, accountRef) =>
+    forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
       s"respond with status code $expectedStatusCode" when {
         s"given child payment ref $accountRef" in withClient { ws =>
           forAll(MakePaymentScenario withFixedAccountRef accountRef) { scenario =>
@@ -225,10 +224,9 @@ class NsiControllerISpec
               .post(scenario.requestBody)
               .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
-
-            response.status shouldBe expectedStatusCode
-            actualErrorCode shouldBe expectedErrorCode
+            response.status                      shouldBe expectedStatusCode
+            (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
+            (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
           }
         }
       }

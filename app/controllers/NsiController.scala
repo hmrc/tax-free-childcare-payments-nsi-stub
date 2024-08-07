@@ -16,8 +16,6 @@
 
 package controllers
 
-import models.ErrorResponse
-import models.ErrorResponse.Code._
 import models.request._
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
@@ -53,16 +51,17 @@ class NsiController @Inject() (
   private def withNsiErrorScenarios[A: Writes](accountRef: String, block: String => Option[A], toResult: JsValue => Result) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
-        new Status(nsiErrorCode.statusCode)(
-          Json.toJson(
-            ErrorResponse(nsiErrorCode, "asdf")
-          )
+        new Status(nsiErrorCode.status)(
+          Json.toJson(nsiErrorCode)
         )
       case None               =>
         block(accountRef) match {
           case Some(model) => toResult(Json.toJson(model))
           case None        => BadRequest(
-              Json.toJson(ErrorResponse(E0000, s"Unsupported test scenario: $accountRef"))
+              Json.obj(
+                "errorCode"        -> "E0000",
+                "errorDescription" -> s"Unsupported test scenario: $accountRef"
+              )
             )
         }
     }
@@ -73,10 +72,13 @@ class NsiController @Inject() (
 }
 
 object NsiController {
+  import models.ErrorResponse._
 
   private val testErrorScenarios = Map(
     "EEAA" -> E0000,
-    "EEBB" -> E0001,
+    "EEBL" -> E0001Link,
+    "EEBB" -> E0001Balance,
+    "EEBP" -> E0001Payment,
     "EECC" -> E0002,
     "EEDD" -> E0003,
     "EEEE" -> E0004,
@@ -84,6 +86,7 @@ object NsiController {
     "EEGG" -> E0006,
     "EEHH" -> E0007,
     "EEII" -> E0008,
+    "EEIJ" -> E0009,
     "EELL" -> E0020,
     "EEMM" -> E0021,
     "EENN" -> E0022,
@@ -91,6 +94,7 @@ object NsiController {
     "EEPP" -> E0024,
     "EEQQ" -> E0025,
     "EERR" -> E0026,
+    "EERS" -> E0027,
     "EESS" -> E0401,
     "EETT" -> E0030,
     "EEUU" -> E0031,
@@ -98,6 +102,7 @@ object NsiController {
     "EEWW" -> E0033,
     "EEXX" -> E0034,
     "EEYY" -> E0035,
+    "EEYZ" -> E0036,
     "EEZZ" -> E0040,
     "EEBA" -> E0041,
     "EEBC" -> E0042,
