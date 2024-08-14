@@ -68,5 +68,5 @@ object MakePaymentScenario extends Generators {
   val expectedResponseFormat: Reads[MakePaymentResponse] = (
     (__ \ "paymentReference").read[String] ~
       (__ \ "paymentDate").read[LocalDate]
-  )(MakePaymentResponse.apply _)
+  )(MakePaymentResponse(_, _:LocalDate))
 }

@@ -20,15 +20,17 @@ import java.time.LocalDate
 
 final case class MakePaymentResponse(
     payment_ref: String,
-    payment_date: LocalDate
+    payment_date: Option[LocalDate]
   )
 
 object MakePaymentResponse {
   import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
   import play.api.libs.json.{__, OWrites}
 
+  def apply(payment_ref: String, payment_date: LocalDate): MakePaymentResponse = apply(payment_ref, Some(payment_date))
+
   implicit val writes: OWrites[MakePaymentResponse] = (
     (__ \ "paymentReference").write[String] ~
-      (__ \ "paymentDate").write[LocalDate]
+      (__ \ "paymentDate").writeNullable[LocalDate]
   )(unlift(unapply))
 }

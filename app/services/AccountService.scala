@@ -93,6 +93,18 @@ class AccountService @Inject() {
         26433
       ),
       MakePaymentResponse("8327950288419716", PAYMENT_DATE)
+    ),
+    "AAFF" -> Account(
+      LinkAccountsResponse("Fred Flintstone"),
+      CheckBalanceResponse(
+        AccountStatus.ACTIVE,
+        14159,
+        26535,
+        89793,
+        23846,
+        26433
+      ),
+      MakePaymentResponse("8327950288419716", None)
     )
   )
 }
