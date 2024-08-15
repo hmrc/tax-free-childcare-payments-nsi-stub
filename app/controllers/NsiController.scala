@@ -35,7 +35,7 @@ class NsiController @Inject() (
   import NsiController._
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef, accountService.getLinkAccountResponse, json => Created(json: JsValue))
+    withNsiErrorScenarios(accountRef, accountService.getLinkAccountResponse, json => Ok(json: JsValue))
   }
 
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {

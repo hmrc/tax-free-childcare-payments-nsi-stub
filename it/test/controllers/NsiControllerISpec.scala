@@ -95,7 +95,7 @@ class NsiControllerISpec
               .get()
               .futureValue
 
-            response.status shouldBe CREATED
+            response.status shouldBe OK
 
             val jsonResult = response.json validate LinkAccountsScenario.expectedResponseFormat
             assert(jsonResult.isSuccess)
