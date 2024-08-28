@@ -17,6 +17,7 @@
 package controllers
 
 import base.JsonGenerators
+import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -73,7 +74,6 @@ class NsiControllerISpec
     ("EEXX00000TFC",               FORBIDDEN,              "E0034",               "Error returned from banking services"),
     ("EEYY00000TFC",               FORBIDDEN,              "E0035",               "Payments from this TFC account are blocked"),
     ("EEYZ00000TFC",               FORBIDDEN,              "E0036",               "Check Payee Bank Details"),
-    ("EEZZ00000TFC",               NOT_FOUND,              "E0040",               "childAccountPaymentRef not found"),
     ("EEBA00000TFC",               NOT_FOUND,              "E0041",               "eppURN not found"),
     ("EEBC00000TFC",               NOT_FOUND,              "E0042",               "ccpURN not found"),
     ("EEBD00000TFC",               NOT_FOUND,              "E0043",               "parentNino not found"),
@@ -81,6 +81,13 @@ class NsiControllerISpec
     ("EEBF00000TFC",               INTERNAL_SERVER_ERROR,  "E9999",               "Error during execution"),
     ("EEBG00000TFC",               SERVICE_UNAVAILABLE,    "E8000",               "Service not available"),
     ("EEBH00000TFC",               SERVICE_UNAVAILABLE,    "E8001",               "Service not available due to lack of connection to provider")
+  )
+
+  /** "EEZZ" is the corresponding account ref for E0040. This generator helps check it has been removed. */
+  private val invalidAccountRefs = Gen.oneOf(
+    Gen.stringOfN(4, Gen.numChar),
+    Gen.stringOfN(4, Gen.alphaLowerChar),
+    Gen const "EEZZ"
   )
 
   val link_url = "/account/v1/accounts/link-to-epp"
@@ -123,7 +130,7 @@ class NsiControllerISpec
 
     "respond with status 400 and errorCode E0000" when {
       "account ref is outside pre-baked scenarios" in withClient { ws =>
-        forAll(LinkAccountsScenario withFixedAccountRef "aaaa") { scenario =>
+        forAll(invalidAccountRefs flatMap LinkAccountsScenario.withFixedAccountRef) { scenario =>
           val response = ws
             .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -179,7 +186,7 @@ class NsiControllerISpec
 
     "respond with status 400 and errorCode E0000" when {
       "account ref is outside pre-baked scenarios" in withClient { ws =>
-        forAll(CheckBalanceScenario withFixedAccountRef "aaaa") { scenario =>
+        forAll(invalidAccountRefs flatMap CheckBalanceScenario.withFixedAccountRef) { scenario =>
           val response = ws
             .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -234,7 +241,7 @@ class NsiControllerISpec
 
     "respond with status 400 and errorCode E0000" when {
       "account ref is outside pre-baked scenarios" in withClient { ws =>
-        forAll(MakePaymentScenario withFixedAccountRef "aaaa") { scenario =>
+        forAll(invalidAccountRefs flatMap MakePaymentScenario.withFixedAccountRef) { scenario =>
           val response = ws
             .url(s"$baseUrl$payment_url")
             .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
