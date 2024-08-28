@@ -17,6 +17,7 @@
 package controllers
 
 import base.JsonGenerators
+import org.scalacheck.Gen
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -39,7 +40,7 @@ class NsiControllerISpec
     with JsonGenerators
     with ScalaCheckPropertyChecks {
   private val contextRoot = "/tax-free-childcare-payments-nsi-stub"
-  private val baseUrl = s"http://localhost:$port$contextRoot"
+  private val baseUrl     = s"http://localhost:$port$contextRoot"
 
   private val CORRELATION_ID = "correlationId"
 
@@ -73,7 +74,6 @@ class NsiControllerISpec
     ("EEXX00000TFC",               FORBIDDEN,              "E0034",               "Error returned from banking services"),
     ("EEYY00000TFC",               FORBIDDEN,              "E0035",               "Payments from this TFC account are blocked"),
     ("EEYZ00000TFC",               FORBIDDEN,              "E0036",               "Check Payee Bank Details"),
-    ("EEZZ00000TFC",               NOT_FOUND,              "E0040",               "childAccountPaymentRef not found"),
     ("EEBA00000TFC",               NOT_FOUND,              "E0041",               "eppURN not found"),
     ("EEBC00000TFC",               NOT_FOUND,              "E0042",               "ccpURN not found"),
     ("EEBD00000TFC",               NOT_FOUND,              "E0043",               "parentNino not found"),
@@ -83,12 +83,19 @@ class NsiControllerISpec
     ("EEBH00000TFC",               SERVICE_UNAVAILABLE,    "E8001",               "Service not available due to lack of connection to provider")
   )
 
+  /** "EEZZ" is the corresponding account ref for E0040. This generator helps check it has been removed. */
+  private val invalidAccountRefs = Gen.oneOf(
+    Gen.stringOfN(4, Gen.numChar),
+    Gen.stringOfN(4, Gen.alphaLowerChar),
+    Gen const "EEZZ"
+  )
+
   val link_url = "/account/v1/accounts/link-to-epp"
   s"POST $link_url/:ref" should {
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains a valid correlation ID header and expected JSON fields are present and account ref starts with AAAA, AABB, AACC, or AADD" in
-        withClient { ws =>
-          forAll(LinkAccountsScenario.random) { scenario =>
+        forAll(LinkAccountsScenario.random) { scenario =>
+          withClient { ws =>
             val response = ws
               .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
@@ -105,148 +112,156 @@ class NsiControllerISpec
 
     forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given child payment ref $accountRef" in withClient { ws =>
+        s"given child payment ref $accountRef" in
           forAll(LinkAccountsScenario withFixedAccountRef accountRef) { scenario =>
+            withClient { ws =>
+              val response = ws
+                .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
+                .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+                .get()
+                .futureValue
+
+              response.status                      shouldBe expectedStatusCode
+              (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
+              (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
+            }
+          }
+      }
+    }
+
+    "respond with status 400 and errorCode E0000" when {
+      "account ref is outside pre-baked scenarios" in
+        forAll(invalidAccountRefs flatMap LinkAccountsScenario.withFixedAccountRef) { scenario =>
+          withClient { ws =>
             val response = ws
               .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
               .get()
               .futureValue
 
-            response.status                      shouldBe expectedStatusCode
-            (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
-            (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
+            val actualErrorCode = (response.json \ "errorCode").as[String]
+
+            response.status shouldBe BAD_REQUEST
+            actualErrorCode shouldBe "E0000"
           }
         }
-      }
-    }
-
-    "respond with status 400 and errorCode E0000" when {
-      "account ref is outside pre-baked scenarios" in withClient { ws =>
-        forAll(LinkAccountsScenario withFixedAccountRef "aaaa") { scenario =>
-          val response = ws
-            .url(s"$baseUrl$link_url/${scenario.account_ref}?${scenario.queryString}")
-            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-            .get()
-            .futureValue
-
-          val actualErrorCode = (response.json \ "errorCode").as[String]
-
-          response.status shouldBe BAD_REQUEST
-          actualErrorCode shouldBe "E0000"
-        }
-      }
     }
   }
 
   val balance_url = "/account/v1/accounts/balance"
   s"GET $balance_url" should {
     s"respond $OK and echo the correlation ID in the response header" when {
-      "request contains valid correlation ID header and account ref starts with AAAA, AABB, AACC, or AADD" in withClient { ws =>
+      "request contains valid correlation ID header and account ref starts with AAAA, AABB, AACC, or AADD" in
         forAll(CheckBalanceScenario.random) { scenario =>
-          val response = ws
-            .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
-            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-            .get()
-            .futureValue
+          withClient { ws =>
+            val response = ws
+              .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
+              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+              .get()
+              .futureValue
 
-          response.status shouldBe OK
+            response.status shouldBe OK
 
-          val jsonResult = response.json validate CheckBalanceScenario.expectedResponseFormat
-          assert(jsonResult.isSuccess)
+            val jsonResult = response.json validate CheckBalanceScenario.expectedResponseFormat
+            assert(jsonResult.isSuccess)
+          }
         }
-      }
     }
 
     forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
       s"respond with status code $expectedStatusCode" when {
-        s"given child payment ref $accountRef" in withClient { ws =>
+        s"given child payment ref $accountRef" in
           forAll(CheckBalanceScenario withFixedAccountRef accountRef) { scenario =>
-            val response =
-              ws
-                .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
-                .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-                .get()
-                .futureValue
+            withClient { ws =>
+              val response =
+                ws
+                  .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
+                  .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+                  .get()
+                  .futureValue
 
-            response.status                      shouldBe expectedStatusCode
-            (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
-            (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
+              response.status                      shouldBe expectedStatusCode
+              (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
+              (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
+            }
           }
-        }
       }
     }
 
     "respond with status 400 and errorCode E0000" when {
-      "account ref is outside pre-baked scenarios" in withClient { ws =>
-        forAll(CheckBalanceScenario withFixedAccountRef "aaaa") { scenario =>
-          val response = ws
-            .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
-            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-            .get()
-            .futureValue
+      "account ref is outside pre-baked scenarios" in
+        forAll(invalidAccountRefs flatMap CheckBalanceScenario.withFixedAccountRef) { scenario =>
+          withClient { ws =>
+            val response = ws
+              .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
+              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+              .get()
+              .futureValue
 
-          val actualErrorCode = (response.json \ "errorCode").as[String]
+            val actualErrorCode = (response.json \ "errorCode").as[String]
 
-          response.status shouldBe BAD_REQUEST
-          actualErrorCode shouldBe "E0000"
+            response.status shouldBe BAD_REQUEST
+            actualErrorCode shouldBe "E0000"
+          }
         }
-      }
     }
   }
 
   val payment_url = "/payment/v1/payments/pay-childcare"
   s"POST $payment_url" should {
     s"respond $CREATED and echo the correlation ID in the response header" when {
-      "request contains valid correlation ID header" in withClient { ws =>
+      "request contains valid correlation ID header" in
         forAll(MakePaymentScenario.random) { scenario =>
-          val response = ws
-            .url(s"$baseUrl$payment_url")
-            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-            .post(scenario.requestBody)
-            .futureValue
-
-          response.status shouldBe CREATED
-
-          val jsonResult = response.json validate MakePaymentScenario.expectedResponseFormat
-          assert(jsonResult.isSuccess)
-        }
-      }
-    }
-
-    forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
-      s"respond with status code $expectedStatusCode" when {
-        s"given child payment ref $accountRef" in withClient { ws =>
-          forAll(MakePaymentScenario withFixedAccountRef accountRef) { scenario =>
+          withClient { ws =>
             val response = ws
               .url(s"$baseUrl$payment_url")
               .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
               .post(scenario.requestBody)
               .futureValue
 
-            response.status                      shouldBe expectedStatusCode
-            (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
-            (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
+            response.status shouldBe CREATED
+
+            val jsonResult = response.json validate MakePaymentScenario.expectedResponseFormat
+            assert(jsonResult.isSuccess)
           }
         }
+    }
+
+    forAll(errorScenarios) { (accountRef, expectedStatusCode, expectedErrorCode, expectedErrorDesc) =>
+      s"respond with status code $expectedStatusCode" when {
+        s"given child payment ref $accountRef" in
+          forAll(MakePaymentScenario withFixedAccountRef accountRef) { scenario =>
+            withClient { ws =>
+              val response = ws
+                .url(s"$baseUrl$payment_url")
+                .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+                .post(scenario.requestBody)
+                .futureValue
+
+              response.status                      shouldBe expectedStatusCode
+              (response.json \ "errorCode")        shouldBe JsDefined(JsString(expectedErrorCode))
+              (response.json \ "errorDescription") shouldBe JsDefined(JsString(expectedErrorDesc))
+            }
+          }
       }
     }
 
     "respond with status 400 and errorCode E0000" when {
-      "account ref is outside pre-baked scenarios" in withClient { ws =>
-        forAll(MakePaymentScenario withFixedAccountRef "aaaa") { scenario =>
-          val response = ws
-            .url(s"$baseUrl$payment_url")
-            .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-            .post(scenario.requestBody)
-            .futureValue
+      "account ref is outside pre-baked scenarios" in
+        forAll(invalidAccountRefs flatMap MakePaymentScenario.withFixedAccountRef) { scenario =>
+          withClient { ws =>
+            val response = ws
+              .url(s"$baseUrl$payment_url")
+              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+              .post(scenario.requestBody)
+              .futureValue
 
-          val actualErrorCode = (response.json \ "errorCode").as[String]
+            val actualErrorCode = (response.json \ "errorCode").as[String]
 
-          response.status shouldBe BAD_REQUEST
-          actualErrorCode shouldBe "E0000"
+            response.status shouldBe BAD_REQUEST
+            actualErrorCode shouldBe "E0000"
+          }
         }
-      }
     }
   }
 }

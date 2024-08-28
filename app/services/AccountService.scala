@@ -16,12 +16,12 @@
 
 package services
 
+import java.time.LocalDate
+
 import com.google.inject.{Inject, Singleton}
 import models.Account
 import models.response.CheckBalanceResponse.AccountStatus
 import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
-
-import java.time.LocalDate
 
 @Singleton
 class AccountService @Inject() {

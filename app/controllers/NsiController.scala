@@ -16,15 +16,16 @@
 
 package controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+
 import models.request._
+import services.AccountService
+
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc._
-import services.AccountService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 
 @Singleton
 class NsiController @Inject() (
@@ -103,7 +104,6 @@ object NsiController {
     "EEXX" -> E0034,
     "EEYY" -> E0035,
     "EEYZ" -> E0036,
-    "EEZZ" -> E0040,
     "EEBA" -> E0041,
     "EEBC" -> E0042,
     "EEBD" -> E0043,
