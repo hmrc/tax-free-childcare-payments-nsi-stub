@@ -56,7 +56,6 @@ object ErrorResponse extends Enumeration {
   val E0035: CodeVal = CodeVal(403, "E0035", "Payments from this TFC account are blocked")
   val E0036: CodeVal = CodeVal(403, "E0036", "Check Payee Bank Details")
 
-  val E0040: CodeVal = CodeVal(404, "E0040", "childAccountPaymentRef not found")
   val E0041: CodeVal = CodeVal(404, "E0041", "eppURN not found")
   val E0042: CodeVal = CodeVal(404, "E0042", "ccpURN not found")
   val E0043: CodeVal = CodeVal(404, "E0043", "parentNino not found")

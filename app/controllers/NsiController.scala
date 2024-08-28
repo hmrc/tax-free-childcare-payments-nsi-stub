@@ -103,7 +103,6 @@ object NsiController {
     "EEXX" -> E0034,
     "EEYY" -> E0035,
     "EEYZ" -> E0036,
-    "EEZZ" -> E0040,
     "EEBA" -> E0041,
     "EEBC" -> E0042,
     "EEBD" -> E0043,
