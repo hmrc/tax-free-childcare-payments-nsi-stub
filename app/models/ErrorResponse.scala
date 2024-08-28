@@ -23,7 +23,7 @@ object ErrorResponse extends Enumeration {
 
   val E0000: CodeVal = CodeVal(400, "E0000", "Invalid input data")
 
-  val E0001Link: CodeVal = CodeVal(404, "E0001", "childAccountPaymentRef is missing")
+  val E0001Link: CodeVal    = CodeVal(404, "E0001", "childAccountPaymentRef is missing")
   val E0001Balance: CodeVal = CodeVal(404, "E0001", "childAccountPaymentRef is missing")
   val E0001Payment: CodeVal = CodeVal(400, "E0001", "childAccountPaymentRef is missing")
 
