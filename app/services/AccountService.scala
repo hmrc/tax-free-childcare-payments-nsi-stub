@@ -38,11 +38,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Peter Pan"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        31415,
+        100,
+        100,
+        100,
+        100
       ),
       MakePaymentResponse("8327950288419716", PAYMENT_DATE)
     ),
@@ -50,11 +50,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Benjamin Button"),
       CheckBalanceResponse(
         AccountStatus.BLOCKED,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        92653,
+        100,
+        100,
+        100,
+        100
       ),
       MakePaymentResponse("8327950288419716", PAYMENT_DATE)
     ),
@@ -62,11 +62,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Christopher Columbus"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        58979,
+        100,
+        100,
+        100,
+        100
       ),
       MakePaymentResponse("8327950288419716", PAYMENT_DATE)
     ),
@@ -74,11 +74,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Donald Duck"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        32384,
+        100,
+        100,
+        100,
+        100
       ),
       MakePaymentResponse("8327950288419716", PAYMENT_DATE)
     ),
@@ -86,11 +86,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Donald Duck"),
       CheckBalanceResponse(
         AccountStatus.UNKNOWN,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        62643,
+        100,
+        100,
+        100,
+        100
       ),
       MakePaymentResponse("8327950288419716", PAYMENT_DATE)
     ),
@@ -98,11 +98,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Fred Flintstone"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        38327,
+        100,
+        100,
+        100,
+        100
       ),
       MakePaymentResponse("8327950288419716", None)
     )
