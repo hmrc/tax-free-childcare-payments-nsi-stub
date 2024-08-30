@@ -17,7 +17,10 @@
 package controllers
 
 import base.JsonGenerators
+import models.response.CheckBalanceResponse
+import models.response.CheckBalanceResponse.AccountStatus
 import org.scalacheck.Gen
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -25,12 +28,15 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status
-import play.api.libs.json.{JsDefined, JsString}
+import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.WsTestClient
+
+import java.util.UUID
 
 class NsiControllerISpec
     extends AnyWordSpec
     with should.Matchers
+    with OptionValues
     with ScalaFutures
     with IntegrationPatience
     with GuiceOneServerPerSuite
@@ -150,20 +156,32 @@ class NsiControllerISpec
 
   val balance_url = "/account/v1/accounts/balance"
   s"GET $balance_url" should {
-    s"respond $OK and echo the correlation ID in the response header" when {
+    s"respond $OK, echo correlation ID, and return expected response body" when {
+      val happyScenarios = Table(
+        ("Given Account Ref", "Expected Response Body"),
+        ("AAAA",              CheckBalanceResponse(AccountStatus.ACTIVE, 31415, 100, 100, 100, 100)),
+        ("AABB",              CheckBalanceResponse(AccountStatus.BLOCKED, 92653, 100, 100, 100, 100)),
+        ("AACC",              CheckBalanceResponse(AccountStatus.ACTIVE, 58979, 100, 100, 100, 100)),
+        ("AADD",              CheckBalanceResponse(AccountStatus.ACTIVE, 32384, 100, 100, 100, 100)),
+        ("AAEE",              CheckBalanceResponse(AccountStatus.UNKNOWN, 62643, 100, 100, 100, 100)),
+        ("AAFF",              CheckBalanceResponse(AccountStatus.ACTIVE, 38327, 100, 100, 100, 100))
+      )
+
       "request contains valid correlation ID header and account ref starts with AAAA, AABB, AACC, or AADD" in
-        forAll(CheckBalanceScenario.random) { scenario =>
+        forAll(happyScenarios) { (givenAccountRef, expectedResponseBody) =>
+          val queryString   = "parentNino=AA123456A&eppURN=1234&eppAccount=1234"
+          val correlationID = UUID.randomUUID().toString
+
           withClient { ws =>
             val response = ws
-              .url(s"$baseUrl$balance_url/${scenario.account_ref}?${scenario.queryString}")
-              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
+              .url(s"$baseUrl$balance_url/$givenAccountRef?$queryString")
+              .withHttpHeaders(CORRELATION_ID -> correlationID)
               .get()
               .futureValue
 
-            response.status shouldBe OK
-
-            val jsonResult = response.json validate CheckBalanceScenario.expectedResponseFormat
-            assert(jsonResult.isSuccess)
+            response.status                       shouldBe OK
+            response.header(CORRELATION_ID).value shouldBe correlationID
+            response.json                         shouldBe Json.toJson(expectedResponseBody)
           }
         }
     }
