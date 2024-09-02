@@ -17,7 +17,7 @@
 package controllers
 
 import base.JsonGenerators
-import models.response.CheckBalanceResponse
+import models.response.{CheckBalanceResponse, MakePaymentResponse}
 import models.response.CheckBalanceResponse.AccountStatus
 import org.scalacheck.Gen
 import org.scalatest.OptionValues
@@ -31,6 +31,7 @@ import play.api.http.Status
 import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.test.WsTestClient
 
+import java.time.LocalDate
 import java.util.UUID
 
 class NsiControllerISpec
@@ -156,18 +157,18 @@ class NsiControllerISpec
 
   val balance_url = "/account/v1/accounts/balance"
   s"GET $balance_url" should {
-    s"respond $OK, echo correlation ID, and return expected response body" when {
+    s"respond 200, echo correlation ID, and return expected response body" when {
       val happyScenarios = Table(
         ("Given Account Ref", "Expected Response Body"),
-        ("AAAA",              CheckBalanceResponse(AccountStatus.ACTIVE, 31415, 100, 100, 100, 100)),
-        ("AABB",              CheckBalanceResponse(AccountStatus.BLOCKED, 92653, 100, 100, 100, 100)),
-        ("AACC",              CheckBalanceResponse(AccountStatus.ACTIVE, 58979, 100, 100, 100, 100)),
-        ("AADD",              CheckBalanceResponse(AccountStatus.ACTIVE, 32384, 100, 100, 100, 100)),
-        ("AAEE",              CheckBalanceResponse(AccountStatus.UNKNOWN, 62643, 100, 100, 100, 100)),
-        ("AAFF",              CheckBalanceResponse(AccountStatus.ACTIVE, 38327, 100, 100, 100, 100))
+        ("AAAA",              CheckBalanceResponse(AccountStatus.ACTIVE, 31415, 65, 66, 67, 68)),
+        ("AABB",              CheckBalanceResponse(AccountStatus.BLOCKED, 92653, 69, 70, 71, 72)),
+        ("AACC",              CheckBalanceResponse(AccountStatus.ACTIVE, 58979, 73, 74, 75, 76)),
+        ("AADD",              CheckBalanceResponse(AccountStatus.ACTIVE, 32384, 77, 78, 79, 80)),
+        ("AAEE",              CheckBalanceResponse(AccountStatus.UNKNOWN, 62643, 81, 82, 83, 84)),
+        ("AAFF",              CheckBalanceResponse(AccountStatus.ACTIVE, 38327, 85, 86, 87, 88))
       )
 
-      "request contains valid correlation ID header and account ref starts with AAAA, AABB, AACC, or AADD" in
+      "given one of the expected account refs" in
         forAll(happyScenarios) { (givenAccountRef, expectedResponseBody) =>
           val queryString   = "parentNino=AA123456A&eppURN=1234&eppAccount=1234"
           val correlationID = UUID.randomUUID().toString
@@ -227,20 +228,41 @@ class NsiControllerISpec
 
   val payment_url = "/payment/v1/payments/pay-childcare"
   s"POST $payment_url" should {
-    s"respond $CREATED and echo the correlation ID in the response header" when {
-      "request contains valid correlation ID header" in
-        forAll(MakePaymentScenario.random) { scenario =>
+    s"respond 201, echo the correlation ID, and return the expected payload" when {
+      val happyScenarios = Table(
+        ("Given Account Ref", "Expected Response Body"),
+        ("AAAA",              MakePaymentResponse("1234568787654321", LocalDate parse "2024-10-01")),
+        ("AABB",              MakePaymentResponse("1234568787654322", LocalDate parse "2024-10-02")),
+        ("AACC",              MakePaymentResponse("1234568787654323", LocalDate parse "2024-10-03")),
+        ("AADD",              MakePaymentResponse("1234568787654324", LocalDate parse "2024-10-04")),
+        ("AAEE",              MakePaymentResponse("1234568787654325", LocalDate parse "2024-10-05")),
+        ("AAFF",              MakePaymentResponse("1234568787654326", LocalDate parse "2024-10-06"))
+      )
+
+      "given one of the expected account refs" in
+        forAll(happyScenarios) { (givenAccountRef, expectedResponseBody) =>
+          val requestBody   = Json.obj(
+            "childAccountPaymentRef" -> givenAccountRef,
+            "parentNino"             -> "AA123456A",
+            "eppURN"                 -> "1234",
+            "eppAccount"             -> "1234",
+            "payeeType"              -> "CCP",
+            "ccpURN"                 -> "1234",
+            "ccpPostcode"            -> "AA1 1AA",
+            "amount"                 -> 100
+          )
+          val correlationID = UUID.randomUUID().toString
+
           withClient { ws =>
             val response = ws
               .url(s"$baseUrl$payment_url")
-              .withHttpHeaders(CORRELATION_ID -> scenario.correlation_id.toString)
-              .post(scenario.requestBody)
+              .withHttpHeaders(CORRELATION_ID -> correlationID)
+              .post(requestBody)
               .futureValue
 
-            response.status shouldBe CREATED
-
-            val jsonResult = response.json validate MakePaymentScenario.expectedResponseFormat
-            assert(jsonResult.isSuccess)
+            response.status                       shouldBe CREATED
+            response.header(CORRELATION_ID).value shouldBe correlationID
+            response.json                         shouldBe Json.toJson(expectedResponseBody)
           }
         }
     }
