@@ -236,7 +236,7 @@ class NsiControllerISpec
         ("AACC",              MakePaymentResponse("1234567887654323", LocalDate parse "2024-10-03")),
         ("AADD",              MakePaymentResponse("1234567887654324", LocalDate parse "2024-10-04")),
         ("AAEE",              MakePaymentResponse("1234567887654325", LocalDate parse "2024-10-05")),
-        ("AAFF",              MakePaymentResponse("1234567887654326", LocalDate parse "2024-10-06"))
+        ("AAFF",              MakePaymentResponse("1234567887654326", None)) // This tests missing payment date.
       )
 
       "given one of the expected account refs" in
