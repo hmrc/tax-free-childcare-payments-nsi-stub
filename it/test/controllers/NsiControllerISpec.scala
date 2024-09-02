@@ -231,12 +231,12 @@ class NsiControllerISpec
     s"respond 201, echo the correlation ID, and return the expected payload" when {
       val happyScenarios = Table(
         ("Given Account Ref", "Expected Response Body"),
-        ("AAAA",              MakePaymentResponse("1234568787654321", LocalDate parse "2024-10-01")),
-        ("AABB",              MakePaymentResponse("1234568787654322", LocalDate parse "2024-10-02")),
-        ("AACC",              MakePaymentResponse("1234568787654323", LocalDate parse "2024-10-03")),
-        ("AADD",              MakePaymentResponse("1234568787654324", LocalDate parse "2024-10-04")),
-        ("AAEE",              MakePaymentResponse("1234568787654325", LocalDate parse "2024-10-05")),
-        ("AAFF",              MakePaymentResponse("1234568787654326", LocalDate parse "2024-10-06"))
+        ("AAAA",              MakePaymentResponse("1234567887654321", LocalDate parse "2024-10-01")),
+        ("AABB",              MakePaymentResponse("1234567887654322", LocalDate parse "2024-10-02")),
+        ("AACC",              MakePaymentResponse("1234567887654323", LocalDate parse "2024-10-03")),
+        ("AADD",              MakePaymentResponse("1234567887654324", LocalDate parse "2024-10-04")),
+        ("AAEE",              MakePaymentResponse("1234567887654325", LocalDate parse "2024-10-05")),
+        ("AAFF",              MakePaymentResponse("1234567887654326", LocalDate parse "2024-10-06"))
       )
 
       "given one of the expected account refs" in
