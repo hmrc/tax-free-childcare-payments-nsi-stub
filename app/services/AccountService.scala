@@ -25,8 +25,6 @@ import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentR
 
 @Singleton
 class AccountService @Inject() {
-  private val PAYMENT_DATE = LocalDate parse "2024-10-01"
-
   def getLinkAccountResponse(accountRef: String): Option[LinkAccountsResponse] = accounts get (accountRef take 4) map (_.linkAccountsResponse)
 
   def getAccountBalanceResponse(accountRef: String): Option[CheckBalanceResponse] = accounts get (accountRef take 4) map (_.balanceResponse)
@@ -38,73 +36,73 @@ class AccountService @Inject() {
       LinkAccountsResponse("Peter Pan"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        31415,
+        65,
+        66,
+        67,
+        68
       ),
-      MakePaymentResponse("8327950288419716", PAYMENT_DATE)
+      MakePaymentResponse("1234567887654321", LocalDate.of(2024,10,1))
     ),
     "AABB" -> Account(
       LinkAccountsResponse("Benjamin Button"),
       CheckBalanceResponse(
         AccountStatus.BLOCKED,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        92653,
+        69,
+        70,
+        71,
+        72
       ),
-      MakePaymentResponse("8327950288419716", PAYMENT_DATE)
+      MakePaymentResponse("1234567887654322", LocalDate.of(2024,10,2))
     ),
     "AACC" -> Account(
       LinkAccountsResponse("Christopher Columbus"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        58979,
+        73,
+        74,
+        75,
+        76
       ),
-      MakePaymentResponse("8327950288419716", PAYMENT_DATE)
+      MakePaymentResponse("1234567887654323", LocalDate.of(2024,10,3))
     ),
     "AADD" -> Account(
       LinkAccountsResponse("Donald Duck"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        32384,
+        77,
+        78,
+        79,
+        80
       ),
-      MakePaymentResponse("8327950288419716", PAYMENT_DATE)
+      MakePaymentResponse("1234567887654324", LocalDate.of(2024,10,4))
     ),
     "AAEE" -> Account(
       LinkAccountsResponse("Donald Duck"),
       CheckBalanceResponse(
         AccountStatus.UNKNOWN,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        62643,
+        81,
+        82,
+        83,
+        84
       ),
-      MakePaymentResponse("8327950288419716", PAYMENT_DATE)
+      MakePaymentResponse("1234567887654325", LocalDate.of(2024,10,5))
     ),
     "AAFF" -> Account(
       LinkAccountsResponse("Fred Flintstone"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        14159,
-        26535,
-        89793,
-        23846,
-        26433
+        38327,
+        85,
+        86,
+        87,
+        88
       ),
-      MakePaymentResponse("8327950288419716", None)
+      MakePaymentResponse("1234567887654326", None)
     )
   )
 }
