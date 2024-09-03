@@ -42,7 +42,7 @@ class AccountService @Inject() {
         67,
         68
       ),
-      MakePaymentResponse("1234567887654321", LocalDate.of(2024,10,1))
+      MakePaymentResponse("1234567887654321", LocalDate.of(2024, 10, 1))
     ),
     "AABB" -> Account(
       LinkAccountsResponse("Benjamin Button"),
@@ -54,7 +54,7 @@ class AccountService @Inject() {
         71,
         72
       ),
-      MakePaymentResponse("1234567887654322", LocalDate.of(2024,10,2))
+      MakePaymentResponse("1234567887654322", LocalDate.of(2024, 10, 2))
     ),
     "AACC" -> Account(
       LinkAccountsResponse("Christopher Columbus"),
@@ -66,7 +66,7 @@ class AccountService @Inject() {
         75,
         76
       ),
-      MakePaymentResponse("1234567887654323", LocalDate.of(2024,10,3))
+      MakePaymentResponse("1234567887654323", LocalDate.of(2024, 10, 3))
     ),
     "AADD" -> Account(
       LinkAccountsResponse("Donald Duck"),
@@ -78,7 +78,7 @@ class AccountService @Inject() {
         79,
         80
       ),
-      MakePaymentResponse("1234567887654324", LocalDate.of(2024,10,4))
+      MakePaymentResponse("1234567887654324", LocalDate.of(2024, 10, 4))
     ),
     "AAEE" -> Account(
       LinkAccountsResponse("Donald Duck"),
@@ -90,7 +90,7 @@ class AccountService @Inject() {
         83,
         84
       ),
-      MakePaymentResponse("1234567887654325", LocalDate.of(2024,10,5))
+      MakePaymentResponse("1234567887654325", LocalDate.of(2024, 10, 5))
     ),
     "AAFF" -> Account(
       LinkAccountsResponse("Fred Flintstone"),
