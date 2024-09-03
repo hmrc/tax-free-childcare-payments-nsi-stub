@@ -81,7 +81,6 @@ class NsiControllerISpec
     ("EEXX00000TFC",               FORBIDDEN,              "E0034",               "Error returned from banking services"),
     ("EEYY00000TFC",               FORBIDDEN,              "E0035",               "Payments from this TFC account are blocked"),
     ("EEYZ00000TFC",               FORBIDDEN,              "E0036",               "Check Payee Bank Details"),
-    ("EEBA00000TFC",               NOT_FOUND,              "E0041",               "eppURN not found"),
     ("EEBC00000TFC",               NOT_FOUND,              "E0042",               "ccpURN not found"),
     ("EEBD00000TFC",               NOT_FOUND,              "E0043",               "parentNino not found"),
     ("EEBE00000TFC",               INTERNAL_SERVER_ERROR,  "E9000",               "Internal server error"),
@@ -90,12 +89,18 @@ class NsiControllerISpec
     ("EEBH00000TFC",               SERVICE_UNAVAILABLE,    "E8001",               "Service not available due to lack of connection to provider")
   )
 
-  /** "EEZZ" is the corresponding account ref for E0040. This generator helps check it has been removed. */
   private val invalidAccountRefs = Gen.oneOf(
     Gen.stringOfN(4, Gen.numChar),
     Gen.stringOfN(4, Gen.alphaLowerChar),
-    Gen const "EEZZ"
+    accountsRefsForObsoleteErrorCodes
   )
+
+  /** Obsolete error scenarios are as follows.
+    *   - EEZZ -> E0040
+    *   - EEBA -> E0041
+    */
+  private lazy val accountsRefsForObsoleteErrorCodes =
+    Gen.oneOf("EEZZ", "EEBA")
 
   val link_url = "/account/v1/accounts/link-to-epp"
   s"POST $link_url/:ref" should {
