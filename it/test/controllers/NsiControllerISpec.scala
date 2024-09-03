@@ -69,7 +69,7 @@ class NsiControllerISpec
     ("EEMM00000TFC",               BAD_REQUEST,            "E0021",               "childDob does not match expected format (YYYY-MM-DD)"),
     ("EENN00000TFC",               BAD_REQUEST,            "E0022",               "payeeType value should be one of ['CCP','EPP']"),
     ("EEOO00000TFC",               BAD_REQUEST,            "E0023",               "amount most be a number"),
-    ("EEPP00000TFC",               BAD_REQUEST,            "E0024",               "eppAccount does not correlate with the provided eppURN"),
+    ("EEPP00000TFC",               BAD_REQUEST,            "E0024",               "EPP details are invalid"),
     ("EEQQ00000TFC",               BAD_REQUEST,            "E0025",               "childDob does not correlate with the provided childAccountPaymentRef"),
     ("EERR00000TFC",               BAD_REQUEST,            "E0026",               "childAccountPaymentRef is not related to parentNino"),
     ("EERS00000TFC",               BAD_REQUEST,            "E0027",               "CCP not linked to Child Account"),

@@ -41,7 +41,7 @@ object ErrorResponse extends Enumeration {
   val E0021: CodeVal = CodeVal(400, "E0021", "childDob does not match expected format (YYYY-MM-DD)")
   val E0022: CodeVal = CodeVal(400, "E0022", "payeeType value should be one of ['CCP','EPP']")
   val E0023: CodeVal = CodeVal(400, "E0023", "amount most be a number")
-  val E0024: CodeVal = CodeVal(400, "E0024", "eppAccount does not correlate with the provided eppURN")
+  val E0024: CodeVal = CodeVal(400, "E0024", "EPP details are invalid")
   val E0025: CodeVal = CodeVal(400, "E0025", "childDob does not correlate with the provided childAccountPaymentRef")
   val E0026: CodeVal = CodeVal(400, "E0026", "childAccountPaymentRef is not related to parentNino")
   val E0027: CodeVal = CodeVal(400, "E0027", "CCP not linked to Child Account")
@@ -56,7 +56,6 @@ object ErrorResponse extends Enumeration {
   val E0035: CodeVal = CodeVal(403, "E0035", "Payments from this TFC account are blocked")
   val E0036: CodeVal = CodeVal(403, "E0036", "Check Payee Bank Details")
 
-  val E0041: CodeVal = CodeVal(404, "E0041", "eppURN not found")
   val E0042: CodeVal = CodeVal(404, "E0042", "ccpURN not found")
   val E0043: CodeVal = CodeVal(404, "E0043", "parentNino not found")
 
