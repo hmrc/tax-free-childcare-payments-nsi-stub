@@ -23,6 +23,7 @@ import models.request._
 import services.AccountService
 
 import play.api.Logging
+import play.api.http.MimeTypes
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -36,35 +37,26 @@ class NsiController @Inject() (
   import NsiController._
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef, accountService.getLinkAccountResponse, json => Ok(json: JsValue))
+    withNsiErrorScenarios(accountRef, Ok, accountService.getLinkAccountResponse)
   }
 
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef, accountService.getAccountBalanceResponse, json => Ok(json: JsValue))
+    withNsiErrorScenarios(accountRef, Ok, accountService.getAccountBalanceResponse)
   }
 
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
     withJsonBody { body: MakePaymentRequest =>
-      withNsiErrorScenarios(body.tfc_account_ref, accountService.getPaymentResponse, json => Created(json: JsValue))
+      withNsiErrorScenarios(body.tfc_account_ref, Created, accountService.getPaymentResponse)
     }
   }
 
-  private def withNsiErrorScenarios[A: Writes](accountRef: String, block: String => Option[A], toResult: JsValue => Result) = {
+  private def withNsiErrorScenarios[A: Writes](accountRef: String, status: Status, getBody: String => A) = {
     testErrorScenarios.get(accountRef take 4) match {
       case Some(nsiErrorCode) =>
         new Status(nsiErrorCode.status)(
           Json.toJson(nsiErrorCode)
         )
-      case None               =>
-        block(accountRef) match {
-          case Some(model) => toResult(Json.toJson(model))
-          case None        => BadRequest(
-              Json.obj(
-                "errorCode"        -> "E0000",
-                "errorDescription" -> s"Unsupported test scenario: $accountRef"
-              )
-            )
-        }
+      case None               => status(Json toJson getBody(accountRef))
     }
   }
 
@@ -72,7 +64,7 @@ class NsiController @Inject() (
     withJsonBody(f andThen Future.successful)
 }
 
-object NsiController {
+object NsiController extends MimeTypes {
   import models.ErrorResponse._
 
   private val testErrorScenarios = Map(
