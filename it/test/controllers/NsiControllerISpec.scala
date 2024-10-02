@@ -17,7 +17,7 @@
 package controllers
 
 import base.JsonGenerators
-import models.response.{CheckBalanceResponse, MakePaymentResponse}
+import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 import models.response.CheckBalanceResponse.AccountStatus
 import org.scalacheck.Gen
 import org.scalatest.OptionValues
@@ -46,6 +46,8 @@ class NsiControllerISpec
     with TableDrivenPropertyChecks
     with JsonGenerators
     with ScalaCheckPropertyChecks {
+  import controllers.NsiControllerISpec._
+
   private val contextRoot = "/tax-free-childcare-payments-nsi-stub"
   private val baseUrl     = s"http://localhost:$port$contextRoot"
 
@@ -141,7 +143,7 @@ class NsiControllerISpec
       }
     }
 
-    "respond with status 400 and errorCode E0000" when {
+    "respond with status 200 and expected default child" when {
       "account ref is outside pre-baked scenarios" in
         forAll(invalidAccountRefs flatMap LinkAccountsScenario.withFixedAccountRef) { scenario =>
           withClient { ws =>
@@ -151,10 +153,8 @@ class NsiControllerISpec
               .get()
               .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
-
-            response.status shouldBe BAD_REQUEST
-            actualErrorCode shouldBe "E0000"
+            response.status shouldBe OK
+            response.json shouldBe expectedDefaultChild
           }
         }
     }
@@ -212,7 +212,7 @@ class NsiControllerISpec
       }
     }
 
-    "respond with status 400 and errorCode E0000" when {
+    "respond with status 200 and expected default balance" when {
       "account ref is outside pre-baked scenarios" in
         forAll(invalidAccountRefs flatMap CheckBalanceScenario.withFixedAccountRef) { scenario =>
           withClient { ws =>
@@ -222,10 +222,8 @@ class NsiControllerISpec
               .get()
               .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
-
-            response.status shouldBe BAD_REQUEST
-            actualErrorCode shouldBe "E0000"
+            response.status shouldBe OK
+            response.json shouldBe expectedDefaultBalance
           }
         }
     }
@@ -291,7 +289,7 @@ class NsiControllerISpec
       }
     }
 
-    "respond with status 400 and errorCode E0000" when {
+    "respond with status 201 and expected default payment" when {
       "account ref is outside pre-baked scenarios" in
         forAll(invalidAccountRefs flatMap MakePaymentScenario.withFixedAccountRef) { scenario =>
           withClient { ws =>
@@ -301,12 +299,19 @@ class NsiControllerISpec
               .post(scenario.requestBody)
               .futureValue
 
-            val actualErrorCode = (response.json \ "errorCode").as[String]
-
-            response.status shouldBe BAD_REQUEST
-            actualErrorCode shouldBe "E0000"
+            response.status shouldBe CREATED
+            response.json shouldBe expectedDefaultPayment
           }
         }
     }
   }
+}
+
+object NsiControllerISpec {
+
+  private val expectedDefaultChild = Json toJson LinkAccountsResponse("Peter Pan")
+
+  private val expectedDefaultBalance = Json toJson CheckBalanceResponse(AccountStatus.ACTIVE, 31415, 65, 66, 67, 68)
+
+  private val expectedDefaultPayment = Json toJson MakePaymentResponse("1234567887654321", LocalDate.of(2024, 10, 1))
 }
