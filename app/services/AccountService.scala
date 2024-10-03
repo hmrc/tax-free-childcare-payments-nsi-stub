@@ -25,25 +25,13 @@ import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentR
 
 @Singleton
 class AccountService @Inject() {
-  def getLinkAccountResponse(accountRef: String): Option[LinkAccountsResponse] = accounts get (accountRef take 4) map (_.linkAccountsResponse)
+  def getLinkAccountResponse(accountRef: String): LinkAccountsResponse = accounts(accountRef take 4).linkAccountsResponse
 
-  def getAccountBalanceResponse(accountRef: String): Option[CheckBalanceResponse] = accounts get (accountRef take 4) map (_.balanceResponse)
+  def getAccountBalanceResponse(accountRef: String): CheckBalanceResponse = accounts(accountRef take 4).balanceResponse
 
-  def getPaymentResponse(accountRef: String): Option[MakePaymentResponse] = accounts get (accountRef take 4) map (_.paymentResponse)
+  def getPaymentResponse(accountRef: String): MakePaymentResponse = accounts(accountRef take 4).paymentResponse
 
   private val accounts = Map(
-    "AAAA" -> Account(
-      LinkAccountsResponse("Peter Pan"),
-      CheckBalanceResponse(
-        AccountStatus.ACTIVE,
-        31415,
-        65,
-        66,
-        67,
-        68
-      ),
-      MakePaymentResponse("1234567887654321", LocalDate.of(2024, 10, 1))
-    ),
     "AABB" -> Account(
       LinkAccountsResponse("Benjamin Button"),
       CheckBalanceResponse(
@@ -104,5 +92,17 @@ class AccountService @Inject() {
       ),
       MakePaymentResponse("1234567887654326", None)
     )
-  )
+  ) withDefaultValue
+    Account(
+      LinkAccountsResponse("Peter Pan"),
+      CheckBalanceResponse(
+        AccountStatus.ACTIVE,
+        31415,
+        65,
+        66,
+        67,
+        68
+      ),
+      MakePaymentResponse("1234567887654321", LocalDate.of(2024, 10, 1))
+    )
 }
