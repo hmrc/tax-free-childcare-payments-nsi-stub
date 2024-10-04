@@ -18,23 +18,24 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
+import scala.util.Try
 
+import models.ErrorResponse
 import models.request._
 import services.AccountService
 
-import play.api.Logging
-import play.api.http.MimeTypes
+import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
 class NsiController @Inject() (
+    conf: Configuration,
     cc: ControllerComponents,
     correlate: CorrelationIdAction,
     accountService: AccountService
-  ) extends BackendController(cc) with Logging {
-  import NsiController._
+  ) extends BackendController(cc) {
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(accountRef, Ok, accountService.getLinkAccountResponse)
@@ -60,48 +61,11 @@ class NsiController @Inject() (
     }
   }
 
+  private val testErrorScenarios = for {
+    (accountRef, errorCode) <- conf.get[Map[String, String]]("errorResponses")
+    errorResponse           <- Try(ErrorResponse withName errorCode).toOption
+  } yield accountRef -> errorResponse.asInstanceOf[ErrorResponse.CodeVal]
+
   private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
     withJsonBody(f andThen Future.successful)
-}
-
-object NsiController extends MimeTypes {
-  import models.ErrorResponse._
-
-  private val testErrorScenarios = Map(
-    "EEAA" -> E0000,
-    "EEBL" -> E0001Link,
-    "EEBB" -> E0001Balance,
-    "EEBP" -> E0001Payment,
-    "EECC" -> E0002,
-    "EEDD" -> E0003,
-    "EEEE" -> E0004,
-    "EEFF" -> E0005,
-    "EEGG" -> E0006,
-    "EEHH" -> E0007,
-    "EEII" -> E0008,
-    "EEIJ" -> E0009,
-    "EELL" -> E0020,
-    "EEMM" -> E0021,
-    "EENN" -> E0022,
-    "EEOO" -> E0023,
-    "EEPP" -> E0024,
-    "EEQQ" -> E0025,
-    "EERR" -> E0026,
-    "EERS" -> E0027,
-    "EESS" -> E0401,
-    "EETT" -> E0030,
-    "EEUU" -> E0031,
-    "EEVV" -> E0032,
-    "EEWW" -> E0033,
-    "EEXX" -> E0034,
-    "EEYY" -> E0035,
-    "EEYZ" -> E0036,
-    "EEBC" -> E0042,
-    "EEBD" -> E0043,
-    "EEBE" -> E9000,
-    "EEBF" -> E9999,
-    "EEBG" -> E8000,
-    "EEBH" -> E8001,
-    "EEBI" -> UNKNOWN
-  )
 }

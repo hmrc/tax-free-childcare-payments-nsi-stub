@@ -16,13 +16,10 @@
 
 package models.request
 
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{Reads, __}
 import play.api.mvc.QueryStringBindable
 
 final case class CheckBalanceRequest(epp_urn: String, epp_account: String, parent_nino: String)
 
-/** Param keys should match Swagger at <https://drive.google.com/drive/folders/1ES36CjJpVumXXCM8VC5VQQa7J3xIIqoW>. */
 object CheckBalanceRequest {
   private val epp_urn_key     = "eppURN"
   private val epp_account_key = "eppAccount"
@@ -44,10 +41,4 @@ object CheckBalanceRequest {
       .map { case (k, v) => s"$k=$v" }
       .mkString("&")
   }
-
-  implicit val reads: Reads[CheckBalanceRequest] = (
-    (__ \ epp_urn_key).read[String] ~
-      (__ \ epp_account_key).read[String] ~
-      (__ \ parent_nino_key).read[String]
-  )(apply _)
 }
