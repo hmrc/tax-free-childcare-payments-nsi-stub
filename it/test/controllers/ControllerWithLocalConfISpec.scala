@@ -16,42 +16,17 @@
 
 package controllers
 
-import base.JsonGenerators
-import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
+import base.BaseISpec
 import models.response.CheckBalanceResponse.AccountStatus
+import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 import org.scalacheck.Gen
-import org.scalatest.OptionValues
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.matchers.should
-import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.http.Status
 import play.api.libs.json.{JsDefined, JsString, Json}
-import play.api.test.WsTestClient
 
 import java.time.LocalDate
 import java.util.UUID
 
-class NsiControllerISpec
-    extends AnyWordSpec
-    with should.Matchers
-    with OptionValues
-    with ScalaFutures
-    with IntegrationPatience
-    with GuiceOneServerPerSuite
-    with WsTestClient
-    with Status
-    with TableDrivenPropertyChecks
-    with JsonGenerators
-    with ScalaCheckPropertyChecks {
-  import controllers.NsiControllerISpec._
-
-  private val contextRoot = "/tax-free-childcare-payments-nsi-stub"
-  private val baseUrl     = s"http://localhost:$port$contextRoot"
-
-  private val CORRELATION_ID = "correlationId"
+class ControllerWithLocalConfISpec extends BaseISpec {
+  import controllers.ControllerWithLocalConfISpec._
 
   private val errorScenarios = Table(
     ("Outbound Child Payment Ref", "Expected Status Code", "Expected Error Code", "Expected Error Description"),
@@ -104,8 +79,7 @@ class NsiControllerISpec
   private lazy val accountsRefsForObsoleteErrorCodes =
     Gen.oneOf("EEZZ", "EEBA")
 
-  val link_url = "/account/v1/accounts/link-to-epp"
-  s"POST $link_url/:ref" should {
+  s"Get $link_url/:ref" should {
     s"respond $OK and echo the correlation ID in the response header" when {
       "request contains a valid correlation ID header and expected JSON fields are present and account ref starts with AAAA, AABB, AACC, or AADD" in
         forAll(LinkAccountsScenario.random) { scenario =>
@@ -160,7 +134,6 @@ class NsiControllerISpec
     }
   }
 
-  val balance_url = "/account/v1/accounts/balance"
   s"GET $balance_url" should {
     s"respond 200, echo correlation ID, and return expected response body" when {
       val happyScenarios = Table(
@@ -229,7 +202,6 @@ class NsiControllerISpec
     }
   }
 
-  val payment_url = "/payment/v1/payments/pay-childcare"
   s"POST $payment_url" should {
     s"respond 201, echo the correlation ID, and return the expected payload" when {
       val happyScenarios = Table(
@@ -307,7 +279,7 @@ class NsiControllerISpec
   }
 }
 
-object NsiControllerISpec {
+object ControllerWithLocalConfISpec {
 
   private val expectedDefaultChild = Json toJson LinkAccountsResponse("Peter Pan")
 
