@@ -33,4 +33,10 @@ object MakePaymentResponse {
     (__ \ "paymentReference").write[String] ~
       (__ \ "paymentDate").writeNullable[LocalDate]
   )(unlift(unapply))
+
+  def parse(config: String): Option[MakePaymentResponse] =
+    config.split(",").map(_.trim).toList match {
+      case reference :: rest => Some(apply(reference, rest.headOption map LocalDate.parse))
+      case _                 => None
+    }
 }

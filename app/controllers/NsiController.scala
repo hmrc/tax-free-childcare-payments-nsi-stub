@@ -58,7 +58,7 @@ class NsiController @Inject() (
   }
 
   private val testErrorScenarios = for {
-    (accountRef, string) <- conf.get[Map[String, String]]("errorResponses")
+    (accountRef, string) <- conf.get[Map[String, String]]("data.errorResponses")
     errorResponse        <- ErrorResponse parse string
   } yield accountRef -> errorResponse
 

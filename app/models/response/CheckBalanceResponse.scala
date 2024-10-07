@@ -47,4 +47,21 @@ object CheckBalanceResponse {
       (__ \ "totalBalance").write[Int] ~
       (__ \ "clearedFunds").write[Int]
   )(unlift(unapply))
+
+  def parse(config: String): Option[CheckBalanceResponse] =
+    config.split(",").map(_.trim).toList match {
+      case status :: topUpAvailable :: topUpRemaining :: paidIn :: totalBalance :: clearedFunds :: _ =>
+        Some(
+          apply(
+            AccountStatus withName status,
+            topUpAvailable.toInt,
+            topUpRemaining.toInt,
+            paidIn.toInt,
+            totalBalance.toInt,
+            clearedFunds.toInt
+          )
+        )
+
+      case _ => None
+    }
 }

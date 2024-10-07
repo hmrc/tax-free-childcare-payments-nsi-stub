@@ -20,7 +20,7 @@ import base.BaseISpec
 import controllers.ControllerWithErrorResponseDisabledISpec.disabledAccountRef
 
 class ControllerWithErrorResponseDisabledISpec extends BaseISpec(
-  s"errorResponses.$disabledAccountRef" -> ""
+  s"data.errorResponses.$disabledAccountRef" -> ""
 ) {
   s"Get $link_url/:ref" should {
     "respond with 200 and a body in the expected format" when {
