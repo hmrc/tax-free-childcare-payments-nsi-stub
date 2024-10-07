@@ -45,7 +45,7 @@ class ControllerWithLocalConfISpec extends BaseISpec {
     ("EELL00000TFC",               BAD_REQUEST,            "E0020",               "parentNino does not match expected format (AANNNNNNA)"),
     ("EEMM00000TFC",               BAD_REQUEST,            "E0021",               "childDob does not match expected format (YYYY-MM-DD)"),
     ("EENN00000TFC",               BAD_REQUEST,            "E0022",               "payeeType value should be one of ['CCP','EPP']"),
-    ("EEOO00000TFC",               BAD_REQUEST,            "E0023",               "amount most be a number"),
+    ("EEOO00000TFC",               BAD_REQUEST,            "E0023",               "amount must be a number"),
     ("EEPP00000TFC",               BAD_REQUEST,            "E0024",               "EPP details are invalid"),
     ("EEQQ00000TFC",               BAD_REQUEST,            "E0025",               "childDob does not correlate with the provided childAccountPaymentRef"),
     ("EERR00000TFC",               BAD_REQUEST,            "E0026",               "childAccountPaymentRef is not related to parentNino"),
