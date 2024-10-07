@@ -18,10 +18,9 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import scala.util.Try
 
-import models.ErrorResponse
 import models.request._
+import models.response.ErrorResponse
 import services.AccountService
 
 import play.api.Configuration
@@ -53,18 +52,15 @@ class NsiController @Inject() (
 
   private def withNsiErrorScenarios[A: Writes](accountRef: String, status: Status, getBody: String => A) = {
     testErrorScenarios.get(accountRef take 4) match {
-      case Some(nsiErrorCode) =>
-        new Status(nsiErrorCode.status)(
-          Json.toJson(nsiErrorCode)
-        )
-      case None               => status(Json toJson getBody(accountRef))
+      case Some(errorResponse) => errorResponse.toResult
+      case None                => status(Json toJson getBody(accountRef))
     }
   }
 
   private val testErrorScenarios = for {
-    (accountRef, errorCode) <- conf.get[Map[String, String]]("errorResponses")
-    errorResponse           <- Try(ErrorResponse withName errorCode).toOption
-  } yield accountRef -> errorResponse.asInstanceOf[ErrorResponse.CodeVal]
+    (accountRef, string) <- conf.get[Map[String, String]]("errorResponses")
+    errorResponse        <- ErrorResponse parse string
+  } yield accountRef -> errorResponse
 
   private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
     withJsonBody(f andThen Future.successful)
