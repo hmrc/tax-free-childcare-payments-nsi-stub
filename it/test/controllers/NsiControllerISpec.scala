@@ -165,12 +165,12 @@ class NsiControllerISpec
     s"respond 200, echo correlation ID, and return expected response body" when {
       val happyScenarios = Table(
         ("Given Account Ref", "Expected Response Body"),
-        ("AAAA",              CheckBalanceResponse(AccountStatus.ACTIVE, 31415, 65, 66, 67, 68)),
-        ("AABB",              CheckBalanceResponse(AccountStatus.BLOCKED, 92653, 69, 70, 71, 72)),
-        ("AACC",              CheckBalanceResponse(AccountStatus.ACTIVE, 58979, 73, 74, 75, 76)),
-        ("AADD",              CheckBalanceResponse(AccountStatus.ACTIVE, 32384, 77, 78, 79, 80)),
-        ("AAEE",              CheckBalanceResponse(AccountStatus.UNKNOWN, 62643, 81, 82, 83, 84)),
-        ("AAFF",              CheckBalanceResponse(AccountStatus.ACTIVE, 38327, 85, 86, 87, 88))
+        ("AAAA",              CheckBalanceResponse(AccountStatus.ACTIVE, 4500, 5500, 5000, 9500, 8000)),
+        ("AABB",              CheckBalanceResponse(AccountStatus.BLOCKED, 5500, 4500, 6000, 11500, 9000)),
+        ("AACC",              CheckBalanceResponse(AccountStatus.ACTIVE, 6500, 3500, 7000, 13500, 10000)),
+        ("AADD",              CheckBalanceResponse(AccountStatus.ACTIVE, 7500, 2500, 8000, 16500, 11000)),
+        ("AAEE",              CheckBalanceResponse(AccountStatus.UNKNOWN, 7500, 2500, 8000, 16500, 11000)),
+        ("AAFF",              CheckBalanceResponse(AccountStatus.ACTIVE, 4500, 5500, 5000, 9500, 8000))
       )
 
       "given one of the expected account refs" in
@@ -311,7 +311,7 @@ object NsiControllerISpec {
 
   private val expectedDefaultChild = Json toJson LinkAccountsResponse("Peter Pan")
 
-  private val expectedDefaultBalance = Json toJson CheckBalanceResponse(AccountStatus.ACTIVE, 31415, 65, 66, 67, 68)
+  private val expectedDefaultBalance = Json toJson CheckBalanceResponse(AccountStatus.ACTIVE, 4500, 5500, 5000, 9500, 8000)
 
   private val expectedDefaultPayment = Json toJson MakePaymentResponse("1234567887654321", LocalDate.of(2024, 10, 1))
 }

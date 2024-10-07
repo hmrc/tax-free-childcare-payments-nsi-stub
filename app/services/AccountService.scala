@@ -36,11 +36,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Benjamin Button"),
       CheckBalanceResponse(
         AccountStatus.BLOCKED,
-        92653,
-        69,
-        70,
-        71,
-        72
+        5500,
+        4500,
+        6000,
+        11500,
+        9000
       ),
       MakePaymentResponse("1234567887654322", LocalDate.of(2024, 10, 2))
     ),
@@ -48,11 +48,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Christopher Columbus"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        58979,
-        73,
-        74,
-        75,
-        76
+        6500,
+        3500,
+        7000,
+        13500,
+        10000
       ),
       MakePaymentResponse("1234567887654323", LocalDate.of(2024, 10, 3))
     ),
@@ -60,11 +60,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Donald Duck"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        32384,
-        77,
-        78,
-        79,
-        80
+        7500,
+        2500,
+        8000,
+        16500,
+        11000
       ),
       MakePaymentResponse("1234567887654324", LocalDate.of(2024, 10, 4))
     ),
@@ -72,11 +72,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Donald Duck"),
       CheckBalanceResponse(
         AccountStatus.UNKNOWN,
-        62643,
-        81,
-        82,
-        83,
-        84
+        7500,
+        2500,
+        8000,
+        16500,
+        11000
       ),
       MakePaymentResponse("1234567887654325", LocalDate.of(2024, 10, 5))
     ),
@@ -84,11 +84,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Fred Flintstone"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        38327,
-        85,
-        86,
-        87,
-        88
+        4500,
+        5500,
+        5000,
+        9500,
+        8000
       ),
       MakePaymentResponse("1234567887654326", None)
     )
@@ -97,11 +97,11 @@ class AccountService @Inject() {
       LinkAccountsResponse("Peter Pan"),
       CheckBalanceResponse(
         AccountStatus.ACTIVE,
-        31415,
-        65,
-        66,
-        67,
-        68
+        4500,
+        5500,
+        5000,
+        9500,
+        8000
       ),
       MakePaymentResponse("1234567887654321", LocalDate.of(2024, 10, 1))
     )
