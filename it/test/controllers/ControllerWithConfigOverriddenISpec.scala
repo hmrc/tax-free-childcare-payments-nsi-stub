@@ -19,7 +19,6 @@ package controllers
 import base.BaseISpec
 import controllers.ControllerWithConfigOverriddenISpec._
 import org.scalacheck.Gen
-import play.api.libs.json.{JsDefined, JsString}
 
 class ControllerWithConfigOverriddenISpec extends BaseISpec(
       s"data.accounts.$ACCOUNT_REF_1"       -> "",

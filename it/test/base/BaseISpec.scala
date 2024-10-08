@@ -16,7 +16,7 @@
 
 package base
 
-import org.scalatest.{DoNotDiscover, OptionValues}
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -25,7 +25,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.Status
-import play.api.inject.guice.{GuiceApplicationBuilder, GuiceApplicationLoader}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.WsTestClient
 
 abstract class BaseISpec(config: (String, Any)*)
