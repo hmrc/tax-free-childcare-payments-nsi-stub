@@ -25,8 +25,8 @@ import play.api.libs.json.{JsDefined, JsString, Json}
 import java.time.LocalDate
 import java.util.UUID
 
-class ControllerWithLocalConfISpec extends BaseISpec {
-  import controllers.ControllerWithLocalConfISpec._
+class ControllerWithConfigUnchangedISpec extends BaseISpec {
+  import controllers.ControllerWithConfigUnchangedISpec._
 
   private val errorScenarios = Table(
     ("Outbound Child Payment Ref", "Expected Status Code", "Expected Error Code", "Expected Error Description"),
@@ -279,7 +279,7 @@ class ControllerWithLocalConfISpec extends BaseISpec {
   }
 }
 
-object ControllerWithLocalConfISpec {
+object ControllerWithConfigUnchangedISpec {
 
   private val expectedDefaultChild = Json toJson LinkAccountsResponse("Peter Pan")
 
