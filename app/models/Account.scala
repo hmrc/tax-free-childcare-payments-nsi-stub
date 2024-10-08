@@ -37,5 +37,7 @@ object Account {
           balance,
           payment
         )
+
+      case _ => None
     }
 }

@@ -22,6 +22,7 @@ import scala.concurrent.Future
 import models.request._
 import models.response.ErrorResponse
 import services.AccountService
+import utils.ConfigMapping
 
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
@@ -30,11 +31,11 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
 class NsiController @Inject() (
-    conf: Configuration,
+    protected val config: Configuration,
     cc: ControllerComponents,
     correlate: CorrelationIdAction,
     accountService: AccountService
-  ) extends BackendController(cc) {
+  ) extends BackendController(cc) with ConfigMapping {
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(accountRef, Ok, accountService.getLinkAccountResponse)
@@ -57,10 +58,7 @@ class NsiController @Inject() (
     }
   }
 
-  private val testErrorScenarios = for {
-    (accountRef, string) <- conf.get[Map[String, String]]("data.errorResponses")
-    errorResponse        <- ErrorResponse parse string
-  } yield accountRef -> errorResponse
+  private val testErrorScenarios = getConfigMap("data.errorResponses")(ErrorResponse.parse)
 
   private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
     withJsonBody(f andThen Future.successful)
