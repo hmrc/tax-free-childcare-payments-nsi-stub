@@ -23,3 +23,21 @@ final case class Account(
     balanceResponse: CheckBalanceResponse,
     paymentResponse: MakePaymentResponse
   )
+
+object Account {
+
+  def parse(config: String): Option[Account] =
+    config.split("\\|").map(_.trim).toList match {
+      case childFullName :: balanceConfig :: paymentConfig :: _ =>
+        for {
+          balance <- CheckBalanceResponse parse balanceConfig
+          payment <- MakePaymentResponse parse paymentConfig
+        } yield apply(
+          LinkAccountsResponse(childFullName),
+          balance,
+          payment
+        )
+
+      case _ => None
+    }
+}
