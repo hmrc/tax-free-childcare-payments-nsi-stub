@@ -23,7 +23,7 @@ case class SharedRequestData(
     epp_reg_reference: String,
     outbound_child_payment_ref: String,
     nino: String
-  )
+)
 
 object SharedRequestData {
   implicit val reads: Reads[SharedRequestData] = Json.reads

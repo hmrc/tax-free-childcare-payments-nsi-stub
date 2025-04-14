@@ -35,7 +35,8 @@ class NsiController @Inject() (
     cc: ControllerComponents,
     correlate: CorrelationIdAction,
     accountService: AccountService
-  ) extends BackendController(cc) with ConfigMapping {
+) extends BackendController(cc)
+    with ConfigMapping {
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(accountRef, Ok, accountService.getLinkAccountResponse)
@@ -51,15 +52,15 @@ class NsiController @Inject() (
     }
   }
 
-  private def withNsiErrorScenarios[A: Writes](accountRef: String, status: Status, getBody: String => A) = {
-    testErrorScenarios.get(accountRef take 4) match {
+  private def withNsiErrorScenarios[A: Writes](accountRef: String, status: Status, getBody: String => A) =
+    testErrorScenarios.get(accountRef.take(4)) match {
       case Some(errorResponse) => errorResponse.toResult
-      case None                => status(Json toJson getBody(accountRef))
+      case None                => status(Json.toJson(getBody(accountRef)))
     }
-  }
 
   private val testErrorScenarios = getConfigMap("data.errorResponses")(ErrorResponse.parse)
 
   private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
-    withJsonBody(f andThen Future.successful)
+    withJsonBody(f.andThen(Future.successful))
+
 }

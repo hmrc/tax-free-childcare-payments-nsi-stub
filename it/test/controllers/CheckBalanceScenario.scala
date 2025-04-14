@@ -28,20 +28,21 @@ final case class CheckBalanceScenario(
     epp_urn: String,
     epp_account: String,
     parent_nino: String
-  ) {
+) {
 
   val queryString: String = CheckBalanceRequest.binder.unbind("", requestData)
 
-  lazy private val requestData = CheckBalanceRequest(epp_urn, epp_account, parent_nino)
+  private lazy val requestData = CheckBalanceRequest(epp_urn, epp_account, parent_nino)
 }
 
 object CheckBalanceScenario extends Generators {
+
   import CheckBalanceResponse.AccountStatus
   import org.scalacheck.Gen
   import play.api.libs.functional.syntax.toFunctionalBuilderOps
   import play.api.libs.json.{Reads, __}
 
-  val random: Gen[CheckBalanceScenario] = accountRefsForHappyPath flatMap withFixedAccountRef
+  val random: Gen[CheckBalanceScenario] = accountRefsForHappyPath.flatMap(withFixedAccountRef)
 
   def withFixedAccountRef(accountRef: String): Gen[CheckBalanceScenario] =
     for {
@@ -60,4 +61,5 @@ object CheckBalanceScenario extends Generators {
       (__ \ "totalBalance").read[Int] ~
       (__ \ "clearedFunds").read[Int]
   )(CheckBalanceResponse.apply _)
+
 }

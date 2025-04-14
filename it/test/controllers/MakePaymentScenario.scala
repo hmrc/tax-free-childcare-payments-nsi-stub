@@ -31,9 +31,10 @@ final case class MakePaymentScenario(
     parent_nino: String,
     ccp_opt: Option[ChildCareProvider],
     payment_amount: Int
-  ) {
+) {
 
-  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
+  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>.
+    */
   val requestBody: JsObject = Json.obj(
     "childAccountPaymentRef" -> account_ref,
     "eppURN"                 -> epp_urn,
@@ -44,15 +45,17 @@ final case class MakePaymentScenario(
     "ccpPostcode"            -> ccp_opt.map(_.postcode),
     "amount"                 -> payment_amount
   )
+
 }
 
 object MakePaymentScenario extends Generators {
+
   import org.scalacheck.Gen
   import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
   import java.time.LocalDate
 
-  val random: Gen[MakePaymentScenario] = accountRefsForHappyPath flatMap withFixedAccountRef
+  val random: Gen[MakePaymentScenario] = accountRefsForHappyPath.flatMap(withFixedAccountRef)
 
   def withFixedAccountRef(account_ref: String): Gen[MakePaymentScenario] =
     for {
@@ -60,13 +63,15 @@ object MakePaymentScenario extends Generators {
       epp_urn        <- nonEmptyAlphaNumStrings
       epp_account    <- nonEmptyAlphaNumStrings
       nino           <- ninos
-      ccp_opt        <- Gen option childCareProviders
+      ccp_opt        <- Gen.option(childCareProviders)
       payment_amount <- Gen.posNum[Int]
     } yield apply(correlation_id, account_ref, epp_urn, epp_account, nino, ccp_opt, payment_amount)
 
-  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
+  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>.
+    */
   val expectedResponseFormat: Reads[MakePaymentResponse] = (
     (__ \ "paymentReference").read[String] ~
       (__ \ "paymentDate").read[LocalDate]
-  )(MakePaymentResponse(_, _:LocalDate))
+  )(MakePaymentResponse(_, _: LocalDate))
+
 }

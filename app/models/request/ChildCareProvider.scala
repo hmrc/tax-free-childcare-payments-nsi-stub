@@ -27,4 +27,5 @@ object ChildCareProvider extends ConstraintReads {
     (__ \ "ccpURN").read(minLength[String](1)) ~
       (__ \ "ccpPostcode").read[String]
   )(apply _)
+
 }

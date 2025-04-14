@@ -1,10 +1,10 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import uk.gov.hmrc.DefaultBuildSettings
 
-ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.16"
-ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / majorVersion                                         := 0
+ThisBuild / scalaVersion                                         := "2.13.16"
+ThisBuild / semanticdbEnabled                                    := true
+ThisBuild / semanticdbVersion                                    := scalafixSemanticdb.revision
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
 lazy val microservice = Project("tax-free-childcare-payments-nsi-stub", file("."))
@@ -34,6 +34,8 @@ lazy val it = project
   .settings(libraryDependencies ++= AppDependencies.it)
 
 commands ++= Seq(
-  Command.command("run-all-tests") { state => "test" :: "it/test" :: state },
-  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "run-all-tests" :: "coverageReport" :: state }
+  Command.command("run-all-tests")(state => "test" :: "it/test" :: state),
+  Command.command("pre-commit") { state =>
+    "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "run-all-tests" :: "coverageReport" :: state
+  }
 )

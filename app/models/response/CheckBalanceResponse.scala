@@ -27,11 +27,12 @@ final case class CheckBalanceResponse(
     paid_in: Int,
     total_balance: Int,
     cleared_funds: Int
-  )
+)
 
 object CheckBalanceResponse {
+
   import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-  import play.api.libs.json.{__, Json, OWrites}
+  import play.api.libs.json.{Json, OWrites, __}
 
   object AccountStatus extends Enumeration {
     val ACTIVE, BLOCKED, UNKNOWN = Value
@@ -53,7 +54,7 @@ object CheckBalanceResponse {
       case status :: topUpAvailable :: topUpRemaining :: paidIn :: totalBalance :: clearedFunds :: _ =>
         Some(
           apply(
-            AccountStatus withName status,
+            AccountStatus.withName(status),
             topUpAvailable.toInt,
             topUpRemaining.toInt,
             paidIn.toInt,
@@ -64,4 +65,5 @@ object CheckBalanceResponse {
 
       case _ => None
     }
+
 }

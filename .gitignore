@@ -37,4 +37,5 @@ target
 .target
 test-result
 tmp
+.bsp
 .vscode/

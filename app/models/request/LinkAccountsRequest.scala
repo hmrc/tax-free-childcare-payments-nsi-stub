@@ -23,7 +23,7 @@ final case class LinkAccountsRequest(
     epp_account: String,
     parent_nino: String,
     child_dob: String
-  )
+)
 
 object LinkAccountsRequest {
   private val epp_urn_key     = "eppURN"
@@ -34,10 +34,10 @@ object LinkAccountsRequest {
   implicit val binder: QueryStringBindable[LinkAccountsRequest] = new QueryStringBindable[LinkAccountsRequest] {
 
     def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LinkAccountsRequest]] = for {
-      epp_urn     <- params get epp_urn_key flatMap (_.headOption)
-      epp_account <- params get epp_account_key flatMap (_.headOption)
-      parent_nino <- params get parent_nino_key flatMap (_.headOption)
-      child_dob   <- params get child_dob_key flatMap (_.headOption)
+      epp_urn     <- params.get(epp_urn_key).flatMap(_.headOption)
+      epp_account <- params.get(epp_account_key).flatMap(_.headOption)
+      parent_nino <- params.get(parent_nino_key).flatMap(_.headOption)
+      child_dob   <- params.get(child_dob_key).flatMap(_.headOption)
     } yield Right(apply(epp_urn, epp_account, parent_nino, child_dob))
 
     def unbind(key: String, value: LinkAccountsRequest): String = Map(
@@ -49,4 +49,5 @@ object LinkAccountsRequest {
       .map { case (k, v) => s"$k=$v" }
       .mkString("&")
   }
+
 }

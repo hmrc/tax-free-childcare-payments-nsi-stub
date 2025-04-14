@@ -28,6 +28,7 @@ case class ErrorResponse(status: Status, code: String, desc: String) {
       "errorDescription" -> desc
     )
   )
+
 }
 
 object ErrorResponse {
@@ -37,4 +38,5 @@ object ErrorResponse {
       case status :: code :: desc :: _ => Some(apply(Status(status.toInt), code, desc))
       case _                           => None
     }
+
 }

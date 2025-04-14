@@ -22,7 +22,7 @@ final case class Account(
     linkAccountsResponse: LinkAccountsResponse,
     balanceResponse: CheckBalanceResponse,
     paymentResponse: MakePaymentResponse
-  )
+)
 
 object Account {
 
@@ -30,8 +30,8 @@ object Account {
     config.split("\\|").map(_.trim).toList match {
       case childFullName :: balanceConfig :: paymentConfig :: _ =>
         for {
-          balance <- CheckBalanceResponse parse balanceConfig
-          payment <- MakePaymentResponse parse paymentConfig
+          balance <- CheckBalanceResponse.parse(balanceConfig)
+          payment <- MakePaymentResponse.parse(paymentConfig)
         } yield apply(
           LinkAccountsResponse(childFullName),
           balance,
@@ -40,4 +40,5 @@ object Account {
 
       case _ => None
     }
+
 }
