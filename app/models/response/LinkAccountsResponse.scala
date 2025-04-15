@@ -22,7 +22,9 @@ final case class LinkAccountsResponse(child_full_name: String)
 
 object LinkAccountsResponse {
 
-  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>. */
+  /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>.
+    */
   implicit val writes: OWrites[LinkAccountsResponse] =
     (__ \ "childFullName").write[String].contramap(_.child_full_name)
+
 }

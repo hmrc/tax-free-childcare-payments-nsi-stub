@@ -27,19 +27,22 @@ import play.api.mvc._
 @Singleton
 class CorrelationIdAction @Inject() (
     val parser: BodyParsers.Default
-  )(implicit val executionContext: ExecutionContext
-  ) extends ActionBuilder[Request, AnyContent] with Results with Status {
+)(implicit val executionContext: ExecutionContext)
+    extends ActionBuilder[Request, AnyContent]
+    with Results
+    with Status {
 
-  override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
-    block(request) map { response =>
-      request.headers get CORRELATION_ID match {
+  override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
+    block(request).map { response =>
+      request.headers.get(CORRELATION_ID) match {
         case Some(correlationId) => response.withHeaders(CORRELATION_ID -> correlationId)
         case None                => response
       }
 
     }
-  }
 
-  /** This should match the header name in the Swagger API spec at <https://drive.google.com/drive/folders/1ES36CjJpVumXXCM8VC5VQQa7J3xIIqoW>. */
+  /** This should match the header name in the Swagger API spec at
+    * <https://drive.google.com/drive/folders/1ES36CjJpVumXXCM8VC5VQQa7J3xIIqoW>.
+    */
   private val CORRELATION_ID = "correlationId"
 }

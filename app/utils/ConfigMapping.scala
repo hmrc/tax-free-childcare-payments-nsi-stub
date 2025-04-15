@@ -26,4 +26,5 @@ trait ConfigMapping {
     (accountRef, conf) <- config.get[Map[String, String]](path)
     model              <- parse(conf)
   } yield accountRef -> model
+
 }

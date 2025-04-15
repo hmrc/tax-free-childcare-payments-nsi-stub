@@ -26,7 +26,7 @@ final case class MakePaymentRequest(
     parent_nino: String,
     ccp_opt: Option[ChildCareProvider],
     payment_amount: Int
-  )
+)
 
 object MakePaymentRequest extends ConstraintReads {
 
@@ -40,11 +40,11 @@ object MakePaymentRequest extends ConstraintReads {
       (__ \ "amount").read[Int](min(1))
   )(apply _)
 
-  private lazy val readsOptCCP = (__ \ "payeeType").read[PayeeType.Value] flatMap readOptCCP
+  private lazy val readsOptCCP = (__ \ "payeeType").read[PayeeType.Value].flatMap(readOptCCP)
 
   private def readOptCCP(payeeType: PayeeType.Value) = Reads { json =>
     payeeType match {
-      case PayeeType.CCP => json.validate[ChildCareProvider] map Some.apply
+      case PayeeType.CCP => json.validate[ChildCareProvider].map(Some.apply)
       case PayeeType.EPP => JsSuccess(None)
     }
   }

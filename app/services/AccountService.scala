@@ -25,14 +25,18 @@ import play.api.Configuration
 
 @Singleton
 class AccountService @Inject() (protected val config: Configuration) extends ConfigMapping {
-  def getLinkAccountResponse(accountRef: String): LinkAccountsResponse = accounts(accountRef take 4).linkAccountsResponse
 
-  def getAccountBalanceResponse(accountRef: String): CheckBalanceResponse = accounts(accountRef take 4).balanceResponse
+  def getLinkAccountResponse(accountRef: String): LinkAccountsResponse = accounts(
+    accountRef.take(4)
+  ).linkAccountsResponse
 
-  def getPaymentResponse(accountRef: String): MakePaymentResponse = accounts(accountRef take 4).paymentResponse
+  def getAccountBalanceResponse(accountRef: String): CheckBalanceResponse = accounts(accountRef.take(4)).balanceResponse
+
+  def getPaymentResponse(accountRef: String): MakePaymentResponse = accounts(accountRef.take(4)).paymentResponse
 
   private val accounts = {
     val accountsBuilder = getConfigMap("data.accounts")(Account.parse)
-    accountsBuilder withDefaultValue accountsBuilder("default")
+    accountsBuilder.withDefaultValue(accountsBuilder("default"))
   }
+
 }

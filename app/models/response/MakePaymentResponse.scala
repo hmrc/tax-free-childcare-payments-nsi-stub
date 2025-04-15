@@ -21,11 +21,12 @@ import java.time.LocalDate
 final case class MakePaymentResponse(
     payment_ref: String,
     payment_date: Option[LocalDate]
-  )
+)
 
 object MakePaymentResponse {
+
   import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-  import play.api.libs.json.{__, OWrites}
+  import play.api.libs.json.{OWrites, __}
 
   def apply(payment_ref: String, payment_date: LocalDate): MakePaymentResponse = apply(payment_ref, Some(payment_date))
 
@@ -36,7 +37,8 @@ object MakePaymentResponse {
 
   def parse(config: String): Option[MakePaymentResponse] =
     config.split(",").map(_.trim).toList match {
-      case reference :: rest => Some(apply(reference, rest.headOption map LocalDate.parse))
+      case reference :: rest => Some(apply(reference, rest.headOption.map(LocalDate.parse)))
       case _                 => None
     }
+
 }

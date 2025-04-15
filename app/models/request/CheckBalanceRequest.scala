@@ -28,9 +28,9 @@ object CheckBalanceRequest {
   implicit val binder: QueryStringBindable[CheckBalanceRequest] = new QueryStringBindable[CheckBalanceRequest] {
 
     def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, CheckBalanceRequest]] = for {
-      epp_urn     <- params get epp_urn_key flatMap (_.headOption)
-      epp_account <- params get epp_account_key flatMap (_.headOption)
-      parent_nino <- params get parent_nino_key flatMap (_.headOption)
+      epp_urn     <- params.get(epp_urn_key).flatMap(_.headOption)
+      epp_account <- params.get(epp_account_key).flatMap(_.headOption)
+      parent_nino <- params.get(parent_nino_key).flatMap(_.headOption)
     } yield Right(apply(epp_urn, epp_account, parent_nino))
 
     def unbind(key: String, value: CheckBalanceRequest): String = Map(
@@ -41,4 +41,5 @@ object CheckBalanceRequest {
       .map { case (k, v) => s"$k=$v" }
       .mkString("&")
   }
+
 }

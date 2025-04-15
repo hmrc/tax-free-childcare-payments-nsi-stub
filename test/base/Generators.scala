@@ -22,7 +22,7 @@ trait Generators {
   import org.scalacheck.Gen
 
   val accountRefsForHappyPath: Gen[String] = for {
-    accountRefInit <- Gen oneOf List("AAAA", "AABB", "AACC", "AADD")
+    accountRefInit <- Gen.oneOf(List("AAAA", "AABB", "AACC", "AADD"))
     accountRefTail <- nonEmptyAlphaNumStrings
   } yield accountRefInit + accountRefTail
 
@@ -35,10 +35,10 @@ trait Generators {
     char0 <- Gen.alphaUpperChar
     char1 <- Gen.alphaUpperChar
     chars <- Gen.listOfN(6, Gen.numChar)
-    char8 <- Gen oneOf "ABCD"
+    char8 <- Gen.oneOf("ABCD")
   } yield char0 +: char1 +: chars.mkString :+ char8
 
-  lazy protected val postcodes: Gen[String] = for {
+  protected lazy val postcodes: Gen[String] = for {
     n        <- Gen.chooseNum(1, 2)
     letters1 <- Gen.listOfN(n, Gen.alphaUpperChar)
     num1     <- Gen.chooseNum(1, 99)
@@ -46,10 +46,10 @@ trait Generators {
     letters2 <- Gen.listOfN(2, Gen.alphaUpperChar)
   } yield s"$letters1$num1 $num2$letters2"
 
-  lazy protected val childCareProviders: Gen[ChildCareProvider] = for {
+  protected lazy val childCareProviders: Gen[ChildCareProvider] = for {
     urn      <- nonEmptyAlphaNumStrings
     postcode <- postcodes
   } yield ChildCareProvider(urn, postcode)
 
-  lazy private val MAX_ID_LEN = 32
+  private lazy val MAX_ID_LEN = 32
 }

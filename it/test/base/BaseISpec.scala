@@ -47,9 +47,9 @@ abstract class BaseISpec(config: (String, Any)*)
       .build()
 
   private val contextRoot = "/tax-free-childcare-payments-nsi-stub"
-  protected val baseUrl     = s"http://localhost:$port$contextRoot"
+  protected val baseUrl   = s"http://localhost:$port$contextRoot"
 
-  protected val link_url = "/account/v1/accounts/link-to-epp"
+  protected val link_url    = "/account/v1/accounts/link-to-epp"
   protected val balance_url = "/account/v1/accounts/balance"
   protected val payment_url = "/payment/v1/payments/pay-childcare"
 

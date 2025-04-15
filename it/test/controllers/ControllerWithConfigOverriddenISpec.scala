@@ -20,15 +20,16 @@ import base.BaseISpec
 import controllers.ControllerWithConfigOverriddenISpec._
 import org.scalacheck.Gen
 
-class ControllerWithConfigOverriddenISpec extends BaseISpec(
+class ControllerWithConfigOverriddenISpec
+    extends BaseISpec(
       s"data.accounts.$ACCOUNT_REF_1"       -> "",
       s"data.errorResponses.$ACCOUNT_REF_2" -> ""
     ) {
 
   private val disabledAccountRefs = Gen.oneOf(ACCOUNT_REF_1, ACCOUNT_REF_2)
 
-  s"Get $link_url/:ref"    should {
-    val scenarios = disabledAccountRefs flatMap LinkAccountsScenario.withFixedAccountRef
+  s"Get $link_url/:ref" should {
+    val scenarios = disabledAccountRefs.flatMap(LinkAccountsScenario.withFixedAccountRef)
 
     "respond with 200 and a body in the expected format" when {
       "account ref is not enabled to return error" in
@@ -39,7 +40,7 @@ class ControllerWithConfigOverriddenISpec extends BaseISpec(
               .get()
               .futureValue
 
-            response.status                              shouldBe OK
+            response.status shouldBe OK
             (response.json \ "childFullName").as[String] shouldBe "Peter Pan"
           }
         }
@@ -47,7 +48,7 @@ class ControllerWithConfigOverriddenISpec extends BaseISpec(
   }
 
   s"GET $balance_url/:ref" should {
-    val scenarios = disabledAccountRefs flatMap CheckBalanceScenario.withFixedAccountRef
+    val scenarios = disabledAccountRefs.flatMap(CheckBalanceScenario.withFixedAccountRef)
 
     "respond with 200 and a body in the expected format" when {
       "account ref is not enabled to return error" in
@@ -58,15 +59,15 @@ class ControllerWithConfigOverriddenISpec extends BaseISpec(
               .get()
               .futureValue
 
-            response.status                            shouldBe OK
+            response.status shouldBe OK
             (response.json \ "topUpAvailable").as[Int] shouldBe 4500
           }
         }
     }
   }
 
-  s"POST $payment_url"     should {
-    val scenarios = disabledAccountRefs flatMap MakePaymentScenario.withFixedAccountRef
+  s"POST $payment_url" should {
+    val scenarios = disabledAccountRefs.flatMap(MakePaymentScenario.withFixedAccountRef)
 
     s"respond with 201 and a body in the expected format" when {
       "account ref is not enabled to return error" in
@@ -77,12 +78,13 @@ class ControllerWithConfigOverriddenISpec extends BaseISpec(
               .post(scenario.requestBody)
               .futureValue
 
-            response.status                                 shouldBe CREATED
+            response.status shouldBe CREATED
             (response.json \ "paymentReference").as[String] shouldBe "1234567887654321"
           }
         }
     }
   }
+
 }
 
 object ControllerWithConfigOverriddenISpec {
