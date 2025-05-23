@@ -22,7 +22,7 @@ trait Generators {
   import org.scalacheck.Gen
 
   val accountRefsForHappyPath: Gen[String] = for {
-    accountRefInit <- Gen.oneOf(List("AAAA", "AABB", "AACC", "AADD"))
+    accountRefInit <- Gen.oneOf(List("AAAA", "AABB", "AACC", "AADD", "AA D"))
     accountRefTail <- nonEmptyAlphaNumStrings
   } yield accountRefInit + accountRefTail
 
@@ -44,7 +44,7 @@ trait Generators {
     num1     <- Gen.chooseNum(1, 99)
     num2     <- Gen.chooseNum(1, 9)
     letters2 <- Gen.listOfN(2, Gen.alphaUpperChar)
-  } yield s"$letters1$num1 $num2$letters2"
+  } yield s"$letters1$num1$num2$letters2"
 
   protected lazy val childCareProviders: Gen[ChildCareProvider] = for {
     urn      <- nonEmptyAlphaNumStrings
