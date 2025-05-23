@@ -141,7 +141,7 @@ class ControllerWithConfigUnchangedISpec extends BaseISpec {
         ("AAAA", CheckBalanceResponse(AccountStatus.ACTIVE, 4500, 5500, 5000, 9500, 8000)),
         ("AABB", CheckBalanceResponse(AccountStatus.BLOCKED, 5500, 4500, 6000, 11500, 9000)),
         ("AACC", CheckBalanceResponse(AccountStatus.ACTIVE, 6500, 3500, 7000, 13500, 10000)),
-        ("AADD", CheckBalanceResponse(AccountStatus.ACTIVE, 7500, 2500, 8000, 16500, 11000)),
+        ("AA D", CheckBalanceResponse(AccountStatus.ACTIVE, 7500, 2500, 8000, 16500, 11000)),
         ("AAEE", CheckBalanceResponse(AccountStatus.UNKNOWN, 7500, 2500, 8000, 16500, 11000)),
         ("AAFF", CheckBalanceResponse(AccountStatus.ACTIVE, 4500, 5500, 5000, 9500, 8000))
       )
@@ -209,7 +209,7 @@ class ControllerWithConfigUnchangedISpec extends BaseISpec {
         ("AAAA", MakePaymentResponse("1234567887654321", LocalDate.parse("2024-10-01"))),
         ("AABB", MakePaymentResponse("1234567887654322", LocalDate.parse("2024-10-02"))),
         ("AACC", MakePaymentResponse("1234567887654323", LocalDate.parse("2024-10-03"))),
-        ("AADD", MakePaymentResponse("1234567887654324", LocalDate.parse("2024-10-04"))),
+        ("AA D", MakePaymentResponse("1234567887654324", LocalDate.parse("2024-10-04"))),
         ("AAEE", MakePaymentResponse("1234567887654325", LocalDate.parse("2024-10-05"))),
         ("AAFF", MakePaymentResponse("1234567887654326", None)) // This tests missing payment date.
       )
