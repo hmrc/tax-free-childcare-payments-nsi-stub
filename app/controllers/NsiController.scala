@@ -18,16 +18,16 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-
 import models.request._
 import models.response.ErrorResponse
 import services.AccountService
 import utils.ConfigMapping
-
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
+import java.net.URLDecoder
 
 @Singleton
 class NsiController @Inject() (
@@ -39,11 +39,11 @@ class NsiController @Inject() (
     with ConfigMapping {
 
   def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef, Ok, accountService.getLinkAccountResponse)
+    withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getLinkAccountResponse)
   }
 
   def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
-    withNsiErrorScenarios(accountRef, Ok, accountService.getAccountBalanceResponse)
+    withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getAccountBalanceResponse)
   }
 
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
