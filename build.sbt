@@ -18,7 +18,6 @@ lazy val microservice = Project("tax-free-childcare-payments-nsi-stub", file("."
       "-Wconf:cat=unused&src=.*Routes\\.scala:s",
       "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     ),
-    resolvers += Resolver.jcenterRepo,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     playDefaultPort := 10501,
     routesImport ++= Seq("models.request._")
