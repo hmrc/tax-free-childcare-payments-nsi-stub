@@ -21,6 +21,7 @@ import models.response.CheckBalanceResponse.AccountStatus
 import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 import org.scalacheck.Gen
 import play.api.libs.json.{JsDefined, JsString, Json}
+import play.api.libs.ws.writeableOf_JsValue
 
 import java.time.LocalDate
 import java.util.UUID

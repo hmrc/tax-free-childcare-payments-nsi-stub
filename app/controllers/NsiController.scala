@@ -47,7 +47,7 @@ class NsiController @Inject() (
   }
 
   def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
-    withJsonBody { body: MakePaymentRequest =>
+    withJsonBody { (body: MakePaymentRequest) =>
       withNsiErrorScenarios(body.tfc_account_ref, Created, accountService.getPaymentResponse)
     }
   }

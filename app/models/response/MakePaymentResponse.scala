@@ -16,6 +16,8 @@
 
 package models.response
 
+import play.api.libs.json.{Json, OFormat}
+
 import java.time.LocalDate
 
 final case class MakePaymentResponse(
@@ -33,7 +35,7 @@ object MakePaymentResponse {
   implicit val writes: OWrites[MakePaymentResponse] = (
     (__ \ "paymentReference").write[String] ~
       (__ \ "paymentDate").writeNullable[LocalDate]
-  )(unlift(unapply))
+  )(Tuple.fromProductTyped(_: MakePaymentResponse))
 
   def parse(config: String): Option[MakePaymentResponse] =
     config.split(",").map(_.trim).toList match {

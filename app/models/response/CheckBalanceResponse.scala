@@ -47,7 +47,7 @@ object CheckBalanceResponse {
       (__ \ "paidIn").write[Int] ~
       (__ \ "totalBalance").write[Int] ~
       (__ \ "clearedFunds").write[Int]
-  )(unlift(unapply))
+  )(Tuple.fromProductTyped(_: CheckBalanceResponse))
 
   def parse(config: String): Option[CheckBalanceResponse] =
     config.split(",").map(_.trim).toList match {
