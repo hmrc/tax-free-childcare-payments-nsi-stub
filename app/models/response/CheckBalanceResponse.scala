@@ -17,11 +17,10 @@
 package models.response
 
 import models.response.CheckBalanceResponse.AccountStatus
-
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, JsString, Reads, Writes}
 
 final case class CheckBalanceResponse(
-    account_status: AccountStatus.Value,
+    account_status: AccountStatus,
     top_up_available: Int,
     top_up_remaining: Int,
     paid_in: Int,
@@ -31,17 +30,24 @@ final case class CheckBalanceResponse(
 
 object CheckBalanceResponse {
 
-  import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-  import play.api.libs.json.{Json, OWrites, __}
+  import play.api.libs.functional.syntax.toFunctionalBuilderOps
+  import play.api.libs.json.{OWrites, __}
 
-  object AccountStatus extends Enumeration {
-    val ACTIVE, BLOCKED, UNKNOWN = Value
-
-    implicit val format: Format[AccountStatus.Value] = Json.formatEnum(this)
+  enum AccountStatus {
+    case ACTIVE, BLOCKED, UNKNOWN
   }
 
-  implicit val writes: OWrites[CheckBalanceResponse] = (
-    (__ \ "accountStatus").write[AccountStatus.Value] ~
+  object AccountStatus {
+
+    given Format[AccountStatus] = Format(
+      Reads.StringReads.map(AccountStatus.valueOf),
+      Writes(status => JsString(status.toString))
+    )
+
+  }
+
+  given OWrites[CheckBalanceResponse] = (
+    (__ \ "accountStatus").write[AccountStatus] ~
       (__ \ "topUpAvailable").write[Int] ~
       (__ \ "topUpRemaining").write[Int] ~
       (__ \ "paidIn").write[Int] ~
@@ -54,7 +60,7 @@ object CheckBalanceResponse {
       case status :: topUpAvailable :: topUpRemaining :: paidIn :: totalBalance :: clearedFunds :: _ =>
         Some(
           apply(
-            AccountStatus.withName(status),
+            AccountStatus.valueOf(status),
             topUpAvailable.toInt,
             topUpRemaining.toInt,
             paidIn.toInt,

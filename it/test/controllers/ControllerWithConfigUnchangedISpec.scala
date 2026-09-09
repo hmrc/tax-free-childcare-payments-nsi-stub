@@ -27,7 +27,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class ControllerWithConfigUnchangedISpec extends BaseISpec {
-  import controllers.ControllerWithConfigUnchangedISpec._
+  import controllers.ControllerWithConfigUnchangedISpec.*
 
   private val errorScenarios = Table(
     ("Outbound Child Payment Ref", "Expected Status Code", "Expected Error Code", "Expected Error Description"),

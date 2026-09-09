@@ -25,7 +25,7 @@ object CheckBalanceRequest {
   private val epp_account_key = "eppAccount"
   private val parent_nino_key = "parentNino"
 
-  implicit val binder: QueryStringBindable[CheckBalanceRequest] = new QueryStringBindable[CheckBalanceRequest] {
+  given binder: QueryStringBindable[CheckBalanceRequest] = new QueryStringBindable[CheckBalanceRequest] {
 
     def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, CheckBalanceRequest]] = for {
       epp_urn     <- params.get(epp_urn_key).flatMap(_.headOption)

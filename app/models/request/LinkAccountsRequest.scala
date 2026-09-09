@@ -31,7 +31,7 @@ object LinkAccountsRequest {
   private val parent_nino_key = "parentNino"
   private val child_dob_key   = "childDoB"
 
-  implicit val binder: QueryStringBindable[LinkAccountsRequest] = new QueryStringBindable[LinkAccountsRequest] {
+  given binder: QueryStringBindable[LinkAccountsRequest] = new QueryStringBindable[LinkAccountsRequest] {
 
     def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LinkAccountsRequest]] = for {
       epp_urn     <- params.get(epp_urn_key).flatMap(_.headOption)

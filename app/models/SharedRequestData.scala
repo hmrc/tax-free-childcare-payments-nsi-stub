@@ -26,5 +26,5 @@ case class SharedRequestData(
 )
 
 object SharedRequestData {
-  implicit val reads: Reads[SharedRequestData] = Json.reads
+  given Reads[SharedRequestData] = Json.reads
 }

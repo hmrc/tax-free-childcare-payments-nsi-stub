@@ -17,7 +17,7 @@
 package controllers
 
 import base.BaseISpec
-import controllers.ControllerWithConfigOverriddenISpec._
+import controllers.ControllerWithConfigOverriddenISpec.*
 import org.scalacheck.Gen
 import play.api.libs.ws.writeableOf_JsValue
 

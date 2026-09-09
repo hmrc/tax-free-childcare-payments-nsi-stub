@@ -54,7 +54,7 @@ object CheckBalanceScenario extends Generators {
 
   /** This should match the API spec in <https://docs.google.com/document/d/10ULaEScNhaAZqFf1hEzxseJB2u_a2GgS>. */
   val expectedResponseFormat: Reads[CheckBalanceResponse] = (
-    (__ \ "accountStatus").read[AccountStatus.Value] ~
+    (__ \ "accountStatus").read[AccountStatus] ~
       (__ \ "topUpAvailable").read[Int] ~
       (__ \ "topUpRemaining").read[Int] ~
       (__ \ "paidIn").read[Int] ~

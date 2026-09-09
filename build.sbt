@@ -13,14 +13,13 @@ lazy val microservice = Project("tax-free-childcare-payments-nsi-stub", file("."
     // suppress warnings in generated routes files
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
-      "-Wconf:cat=unused&src=views/.*\\.scala:s",
-      "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
-      "-Wconf:cat=unused&src=.*Routes\\.scala:s",
-      "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
+      "-Wconf:msg=unused import&src=html/.*:s",
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-explain"
     ),
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     playDefaultPort := 10501,
-    routesImport ++= Seq("models.request._")
+    routesImport ++= Seq("models.request.*")
   )
   .settings(CodeCoverageSettings.settings *)
 

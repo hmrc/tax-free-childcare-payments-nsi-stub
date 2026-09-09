@@ -23,7 +23,7 @@ final case class ChildCareProvider(urn: String, postcode: String)
 
 object ChildCareProvider extends ConstraintReads {
 
-  implicit val reads: Reads[ChildCareProvider] = (
+  given reads: Reads[ChildCareProvider] = (
     (__ \ "ccpURN").read(minLength[String](1)) ~
       (__ \ "ccpPostcode").read[String]
   )(apply _)

@@ -24,7 +24,7 @@ object LinkAccountsResponse {
 
   /** This should match the Swagger API spec in <https://docs.google.com/document/d/1QkNM3HCp228OwFS7elTtboKjmFS6jqS7>.
     */
-  implicit val writes: OWrites[LinkAccountsResponse] =
+  given writes: OWrites[LinkAccountsResponse] =
     (__ \ "childFullName").write[String].contramap(_.child_full_name)
 
 }
