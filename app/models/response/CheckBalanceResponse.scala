@@ -39,11 +39,13 @@ object CheckBalanceResponse {
 
   object AccountStatus {
 
+    def valueOfOpt(value: String): Option[AccountStatus] = values.find(_.toString == value)
+
     given Format[AccountStatus] = Format(
       Reads { json =>
         json.validate[String].flatMap { value =>
-          AccountStatus.values
-            .find(_.toString == value)
+          AccountStatus
+            .valueOfOpt(value)
             .map(JsSuccess(_))
             .getOrElse(JsError(s"Invalid AccountStatus: $value"))
         }
@@ -65,8 +67,8 @@ object CheckBalanceResponse {
   def parse(config: String): Option[CheckBalanceResponse] =
     config.split(",").map(_.trim).toList match {
       case status :: topUpAvailable :: topUpRemaining :: paidIn :: totalBalance :: clearedFunds :: _ =>
-        AccountStatus.values.find(_.toString == status).map { accountStatus =>
-          apply(
+        AccountStatus.valueOfOpt(status).map { accountStatus =>
+          CheckBalanceResponse(
             accountStatus,
             topUpAvailable.toInt,
             topUpRemaining.toInt,

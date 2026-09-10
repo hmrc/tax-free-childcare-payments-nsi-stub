@@ -40,7 +40,7 @@ class NsiController @Inject() (
 ) extends BackendController(cc)
     with ConfigMapping {
 
-  def link(accountRef: String, @unused requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
+  def link(accountRef: String, @unused requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getLinkAccountResponse)
   }
 
