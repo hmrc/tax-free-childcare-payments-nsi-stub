@@ -28,6 +28,8 @@ import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.net.URLDecoder
+import scala.annotation.unused
+import scala.reflect.ClassTag
 
 @Singleton
 class NsiController @Inject() (
@@ -38,11 +40,11 @@ class NsiController @Inject() (
 ) extends BackendController(cc)
     with ConfigMapping {
 
-  def link(accountRef: String): Action[AnyContent] = correlate {
+  def link(accountRef: String, @unused requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getLinkAccountResponse)
   }
 
-  def balance(accountRef: String): Action[AnyContent] = correlate {
+  def balance(accountRef: String, @unused requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getAccountBalanceResponse)
   }
 
@@ -62,7 +64,7 @@ class NsiController @Inject() (
 
   private val testErrorScenarios = getConfigMap("data.errorResponses")(ErrorResponse.parse)
 
-  private def withJsonBody[T: Manifest: Reads](f: T => Result)(using Request[JsValue]): Future[Result] =
+  private def withJsonBody[T: ClassTag: Reads](f: T => Result)(using Request[JsValue]): Future[Result] =
     withJsonBody(f.andThen(Future.successful))
 
 }

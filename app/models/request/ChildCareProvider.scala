@@ -23,7 +23,7 @@ final case class ChildCareProvider(urn: String, postcode: String)
 
 object ChildCareProvider extends ConstraintReads {
 
-  given reads: Reads[ChildCareProvider] = (
+  given Reads[ChildCareProvider] = (
     (__ \ "ccpURN").read(minLength[String](1)) ~
       (__ \ "ccpPostcode").read[String]
   )(apply _)

@@ -55,8 +55,14 @@ object MakePaymentRequest extends ConstraintReads {
 
   private object PayeeType {
 
-    given Reads[PayeeType] =
-      Reads.StringReads.map(PayeeType.valueOf)
+    given Reads[PayeeType] = Reads { json =>
+      json.validate[String].flatMap { value =>
+        PayeeType.values
+          .find(_.toString == value)
+          .map(JsSuccess(_))
+          .getOrElse(JsError(s"Invalid PayeeType: $value"))
+      }
+    }
 
   }
 

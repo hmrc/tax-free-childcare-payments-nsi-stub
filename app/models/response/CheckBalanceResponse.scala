@@ -17,7 +17,7 @@
 package models.response
 
 import models.response.CheckBalanceResponse.AccountStatus
-import play.api.libs.json.{Format, JsString, Reads, Writes}
+import play.api.libs.json.{Format, JsError, JsString, JsSuccess, Reads, Writes}
 
 final case class CheckBalanceResponse(
     account_status: AccountStatus,
@@ -40,7 +40,14 @@ object CheckBalanceResponse {
   object AccountStatus {
 
     given Format[AccountStatus] = Format(
-      Reads.StringReads.map(AccountStatus.valueOf),
+      Reads { json =>
+        json.validate[String].flatMap { value =>
+          AccountStatus.values
+            .find(_.toString == value)
+            .map(JsSuccess(_))
+            .getOrElse(JsError(s"Invalid AccountStatus: $value"))
+        }
+      },
       Writes(status => JsString(status.toString))
     )
 
@@ -58,16 +65,16 @@ object CheckBalanceResponse {
   def parse(config: String): Option[CheckBalanceResponse] =
     config.split(",").map(_.trim).toList match {
       case status :: topUpAvailable :: topUpRemaining :: paidIn :: totalBalance :: clearedFunds :: _ =>
-        Some(
+        AccountStatus.values.find(_.toString == status).map { accountStatus =>
           apply(
-            AccountStatus.valueOf(status),
+            accountStatus,
             topUpAvailable.toInt,
             topUpRemaining.toInt,
             paidIn.toInt,
             totalBalance.toInt,
             clearedFunds.toInt
           )
-        )
+        }
 
       case _ => None
     }
