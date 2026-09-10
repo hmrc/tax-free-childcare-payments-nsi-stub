@@ -17,11 +17,10 @@
 package models.response
 
 import models.response.CheckBalanceResponse.AccountStatus
-
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, JsError, JsString, JsSuccess, Reads, Writes}
 
 final case class CheckBalanceResponse(
-    account_status: AccountStatus.Value,
+    account_status: AccountStatus,
     top_up_available: Int,
     top_up_remaining: Int,
     paid_in: Int,
@@ -31,37 +30,53 @@ final case class CheckBalanceResponse(
 
 object CheckBalanceResponse {
 
-  import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-  import play.api.libs.json.{Json, OWrites, __}
+  import play.api.libs.functional.syntax.toFunctionalBuilderOps
+  import play.api.libs.json.{OWrites, __}
 
-  object AccountStatus extends Enumeration {
-    val ACTIVE, BLOCKED, UNKNOWN = Value
-
-    implicit val format: Format[AccountStatus.Value] = Json.formatEnum(this)
+  enum AccountStatus {
+    case ACTIVE, BLOCKED, UNKNOWN
   }
 
-  implicit val writes: OWrites[CheckBalanceResponse] = (
-    (__ \ "accountStatus").write[AccountStatus.Value] ~
+  object AccountStatus {
+
+    def valueOfOpt(value: String): Option[AccountStatus] = values.find(_.toString == value)
+
+    given Format[AccountStatus] = Format(
+      Reads { json =>
+        json.validate[String].flatMap { value =>
+          AccountStatus
+            .valueOfOpt(value)
+            .map(JsSuccess(_))
+            .getOrElse(JsError(s"Invalid AccountStatus: $value"))
+        }
+      },
+      Writes(status => JsString(status.toString))
+    )
+
+  }
+
+  given OWrites[CheckBalanceResponse] = (
+    (__ \ "accountStatus").write[AccountStatus] ~
       (__ \ "topUpAvailable").write[Int] ~
       (__ \ "topUpRemaining").write[Int] ~
       (__ \ "paidIn").write[Int] ~
       (__ \ "totalBalance").write[Int] ~
       (__ \ "clearedFunds").write[Int]
-  )(unlift(unapply))
+  )(Tuple.fromProductTyped(_: CheckBalanceResponse))
 
   def parse(config: String): Option[CheckBalanceResponse] =
     config.split(",").map(_.trim).toList match {
       case status :: topUpAvailable :: topUpRemaining :: paidIn :: totalBalance :: clearedFunds :: _ =>
-        Some(
-          apply(
-            AccountStatus.withName(status),
+        AccountStatus.valueOfOpt(status).map { accountStatus =>
+          CheckBalanceResponse(
+            accountStatus,
             topUpAvailable.toInt,
             topUpRemaining.toInt,
             paidIn.toInt,
             totalBalance.toInt,
             clearedFunds.toInt
           )
-        )
+        }
 
       case _ => None
     }

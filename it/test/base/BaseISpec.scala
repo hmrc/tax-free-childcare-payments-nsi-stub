@@ -43,7 +43,7 @@ abstract class BaseISpec(config: (String, Any)*)
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
-      .configure(config: _*)
+      .configure(config*)
       .build()
 
   private val contextRoot = "/tax-free-childcare-payments-nsi-stub"

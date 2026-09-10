@@ -17,7 +17,7 @@
 package models.request
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json._
+import play.api.libs.json.*
 
 final case class MakePaymentRequest(
     tfc_account_ref: String,
@@ -31,7 +31,7 @@ final case class MakePaymentRequest(
 object MakePaymentRequest extends ConstraintReads {
 
   /** This should match the API spec in <https://docs.google.com/document/d/1Z8mPFoOJQbkELv_3PSnODyaicL0Gx17P>. */
-  implicit val reads: Reads[MakePaymentRequest] = (
+  given Reads[MakePaymentRequest] = (
     (__ \ "childAccountPaymentRef").read(minLength[String](1)) ~
       (__ \ "eppURN").read(minLength[String](1)) ~
       (__ \ "eppAccount").read(minLength[String](1)) ~
@@ -40,19 +40,30 @@ object MakePaymentRequest extends ConstraintReads {
       (__ \ "amount").read[Int](min(1))
   )(apply _)
 
-  private lazy val readsOptCCP = (__ \ "payeeType").read[PayeeType.Value].flatMap(readOptCCP)
+  private lazy val readsOptCCP = (__ \ "payeeType").read[PayeeType].flatMap(readOptCCP)
 
-  private def readOptCCP(payeeType: PayeeType.Value) = Reads { json =>
+  private def readOptCCP(payeeType: PayeeType) = Reads { json =>
     payeeType match {
       case PayeeType.CCP => json.validate[ChildCareProvider].map(Some.apply)
       case PayeeType.EPP => JsSuccess(None)
     }
   }
 
-  private object PayeeType extends Enumeration {
-    val CCP, EPP = Value
+  private enum PayeeType {
+    case CCP, EPP
+  }
 
-    implicit val reads: Reads[PayeeType.Value] = Json.formatEnum(this)
+  private object PayeeType {
+
+    given Reads[PayeeType] = Reads { json =>
+      json.validate[String].flatMap { value =>
+        PayeeType.values
+          .find(_.toString == value)
+          .map(JsSuccess(_))
+          .getOrElse(JsError(s"Invalid PayeeType: $value"))
+      }
+    }
+
   }
 
   private lazy val NINO_PATTERN = "[A-Z]{2}\\d{6}[A-D]".r

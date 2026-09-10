@@ -21,12 +21,13 @@ import models.response.CheckBalanceResponse.AccountStatus
 import models.response.{CheckBalanceResponse, LinkAccountsResponse, MakePaymentResponse}
 import org.scalacheck.Gen
 import play.api.libs.json.{JsDefined, JsString, Json}
+import play.api.libs.ws.writeableOf_JsValue
 
 import java.time.LocalDate
 import java.util.UUID
+import controllers.ControllerWithConfigUnchangedISpec.*
 
 class ControllerWithConfigUnchangedISpec extends BaseISpec {
-  import controllers.ControllerWithConfigUnchangedISpec._
 
   private val errorScenarios = Table(
     ("Outbound Child Payment Ref", "Expected Status Code", "Expected Error Code", "Expected Error Description"),

@@ -18,16 +18,18 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import models.request._
+import models.request.*
 import models.response.ErrorResponse
 import services.AccountService
 import utils.ConfigMapping
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.net.URLDecoder
+import scala.annotation.unused
+import scala.reflect.ClassTag
 
 @Singleton
 class NsiController @Inject() (
@@ -38,16 +40,18 @@ class NsiController @Inject() (
 ) extends BackendController(cc)
     with ConfigMapping {
 
-  def link(accountRef: String, requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
+  def link(accountRef: String, @unused requestData: LinkAccountsRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getLinkAccountResponse)
   }
 
-  def balance(accountRef: String, requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
+  def balance(accountRef: String, @unused requestData: CheckBalanceRequest): Action[AnyContent] = correlate {
     withNsiErrorScenarios(URLDecoder.decode(accountRef, "UTF-8"), Ok, accountService.getAccountBalanceResponse)
   }
 
-  def payment(): Action[JsValue] = correlate(parse.json).async { implicit req =>
-    withJsonBody { body: MakePaymentRequest =>
+  def payment(): Action[JsValue] = correlate(parse.json).async { request =>
+    given Request[JsValue] = request
+
+    withJsonBody { (body: MakePaymentRequest) =>
       withNsiErrorScenarios(body.tfc_account_ref, Created, accountService.getPaymentResponse)
     }
   }
@@ -60,7 +64,7 @@ class NsiController @Inject() (
 
   private val testErrorScenarios = getConfigMap("data.errorResponses")(ErrorResponse.parse)
 
-  private def withJsonBody[T: Manifest: Reads](f: T => Result)(implicit request: Request[JsValue]): Future[Result] =
+  private def withJsonBody[T: ClassTag: Reads](f: T => Result)(using Request[JsValue]): Future[Result] =
     withJsonBody(f.andThen(Future.successful))
 
 }

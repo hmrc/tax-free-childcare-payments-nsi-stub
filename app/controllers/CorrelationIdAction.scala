@@ -22,12 +22,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import com.google.inject.Inject
 
 import play.api.http.Status
-import play.api.mvc._
+import play.api.mvc.*
 
 @Singleton
 class CorrelationIdAction @Inject() (
     val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
+)(using override val executionContext: ExecutionContext)
     extends ActionBuilder[Request, AnyContent]
     with Results
     with Status {

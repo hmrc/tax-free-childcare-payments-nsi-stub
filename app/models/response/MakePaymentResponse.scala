@@ -25,15 +25,15 @@ final case class MakePaymentResponse(
 
 object MakePaymentResponse {
 
-  import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+  import play.api.libs.functional.syntax.toFunctionalBuilderOps
   import play.api.libs.json.{OWrites, __}
 
   def apply(payment_ref: String, payment_date: LocalDate): MakePaymentResponse = apply(payment_ref, Some(payment_date))
 
-  implicit val writes: OWrites[MakePaymentResponse] = (
+  given OWrites[MakePaymentResponse] = (
     (__ \ "paymentReference").write[String] ~
       (__ \ "paymentDate").writeNullable[LocalDate]
-  )(unlift(unapply))
+  )(Tuple.fromProductTyped(_: MakePaymentResponse))
 
   def parse(config: String): Option[MakePaymentResponse] =
     config.split(",").map(_.trim).toList match {
